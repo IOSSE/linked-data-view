@@ -17,7 +17,7 @@ $protocol='http://'; // used for subject uri
 $base='/data'; // used for base folder e.g. when used behind proxy e.g. /data/
 
 $uri=$_SERVER['REQUEST_URI'];
-if (strpos($string, $base) !== 0) $uri=$base.$uri
+if (strpos($uri, $base) !== 0) $uri = $base . $uri;
 
 /* Content negotiation */
 
