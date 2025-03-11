@@ -19,8 +19,6 @@ $base='/data'; // used for base folder e.g. when used behind proxy e.g. /data/
 $uri=$_SERVER['REQUEST_URI'];
 if (strpos($uri, $base) !== 0) $uri = $base . $uri;
 
-echo $uri;
-exit;
 /* Content negotiation */
 
 $ctype=substr($uri,strrpos($uri,'.')+1);
