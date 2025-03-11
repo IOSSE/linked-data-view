@@ -18,6 +18,7 @@ $base='/data'; // used for base folder e.g. when used behind proxy e.g. /data/
 
 $uri=$_SERVER['REQUEST_URI'];
 if (strpos($uri, $base) !== 0) $uri = $base . $uri;
+else $base='';
 
 /* Content negotiation */
 
@@ -39,7 +40,7 @@ else {
 /* deliver content */
 function query($uri,$type) {
 
-	global $endpoints, $resources, $protocol;
+	global $endpoints, $resources, $protocol, $base;
 
 	/* find sparql endpint for resource */	
 	$i=0;$needle='';
@@ -69,9 +70,7 @@ function query($uri,$type) {
 	$rdfs_label='http://www.w3.org/2000/01/rdf-schema#label';
 	$template = file_get_contents('template.html');
 	
-	$script_path = substr($_SERVER['SCRIPT_NAME'],0,strrpos($_SERVER['SCRIPT_NAME'],'index.php'));
-	$template = str_replace('index.css',$script_path.'index.css', $template);
-	$template = str_replace('index.js',$script_path.'index.js', $template);
+	$template = str_replace('[path]',$base.'/', $template);
 	$template = str_replace('[subject]',$subject, $template);
 
 	/* init curl */
