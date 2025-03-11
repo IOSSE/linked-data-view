@@ -14,9 +14,13 @@ $resources = ['/meta-pfarrerbuch.evangelische-archive.de/data/brandenburg/',
 
 $protocol='http://'; // used for subject uri
 
-/* Content negotiation */
+$base='/data'; // used for base folder e.g. when used behind proxy e.g. /data/
 
 $uri=$_SERVER['REQUEST_URI'];
+if (strpos($string, $base) !== 0) $uri=$base.$uri
+
+/* Content negotiation */
+
 $ctype=substr($uri,strrpos($uri,'.')+1);
 if (($ctype=='html')||($ctype=='json')||($ctype=='label')) query($uri,$ctype);
 else {
