@@ -11,35 +11,74 @@ tr>td:(2)nd-child {
 	max-width: 60%
 }
 
-a[href*="//data.pcp-on-web.de/"] {
-	font-weight: bold;
-}
-
 body {
 	background-color: #b3d4fc;
 }
 
 body>div {
 	width:90%;
-	margin: 2% auto;
+	margin: 1% auto 0 auto;;
 	background-color: #FFF;
-padding: 50px;
-box-sizing: border-box;
-border-radius: 3px 15px 5px 30px;
+	padding: 2em;
+	box-sizing: border-box;
+	border-radius: 3px 15px 5px 30px;
 
 }
 
+body>div:first-child {
+	width:90%;
+	margin: 0 auto;
+	padding: 1em 1em 0 1em ;
+	text-align: right;
+	background-color: inherit;
+	box-sizing: content-box;
+	border-radius: 0;
+}
 h1 {
 	margin-top: 0px;
+	margin-bottom: 0.01em;
 }
 
-.inverse-property>td:first-child::before {
-    content: '←';
-    margin-right: 5px; /* Optional: Abstand zwischen dem Pfeil und dem Inhalt */
+h2 {
+	font-size: 1em;
+	font-weight: normal;
+	padding-top: 0px;
+	margin-top: 0px;
 }
-
 .property>td:first-child::before {
     content: '→';
     margin-right: 5px; /* Optional: Abstand zwischen dem Pfeil und dem Inhalt */
+}
+
+.property.inverse>td:first-child::before {
+    content: '←';
+}
+
+.property>td {
+    padding: 0.1em 1em; 
+    border-radius: 0.5em; /* Abgerundete Ecken */
+    transition: background-color 0.3s; /* Sanfter Übergang bei Hover */
+}
+
+.property>td:first-child {
+
+    background-color: white; 
+    color: blue; 
+    text-align: center; /* Zentriere den Text */
+    border: 2px solid #0056b3;
+}
+
+.property>td>a{
+    text-decoration: none;
+}
+
+
+.property>td:nth-child(2) {
+
+    background-color: white; 
+    color: black; 
+    text-align: left;
+    border: 2px solid #ddd;
+    width: 100%;
 }
 

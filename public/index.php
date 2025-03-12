@@ -75,6 +75,7 @@ function query($uri,$type) {
 	
 	$template = str_replace('[path]',$base.'/', $template);
 	$template = str_replace('[subject]',$subject, $template);
+	$template = str_replace('[date]', date('d.m.Y'), $template);
 
 	/* init curl */
 	if (!function_exists('curl_init')) die('CURL is not installed!');
@@ -134,7 +135,7 @@ function key_value_pairs($sparql,$endpoint,$inverse=false) {
 	$table = '';
 	
 	foreach ($json_result->results->bindings as $row) {
-		if ($inverse) $table .= '<tr class="inverse-property">';
+		if ($inverse) $table .= '<tr class="property inverse">';
 		else $table .= '<tr class="property">';
 		$table .= '<td><a class="resource extern" href="'.$row->p->value.'" uri="'.$row->p->value.'">'.$row->p->value.'</a></td>';
 		

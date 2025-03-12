@@ -36,6 +36,6 @@ document.querySelectorAll('a.resource.extern').forEach(function(element) {
             break;
         }
     }
-
+    element.target='_blank'; // Fügt target="_blank" hinzu
     element.textContent = newHref; // Optional: Ändere auch den sichtbaren Text
 });
