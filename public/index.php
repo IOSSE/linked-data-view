@@ -3,22 +3,25 @@ header("access-control-allow-origin: *");
 
 /* Configuration */
 
-$endpoints = ['https://meta-pfarrerbuch.evangelische-archive.de/meta-daten/brandenburg/sparql',
-	       'https://meta-pfarrerbuch.evangelische-archive.de/meta-daten/kps/sparql',
-	       'https://meta-pfarrerbuch.evangelische-archive.de/meta-daten/sachsen/sparql',
-	     ];
-$resources = ['/meta-pfarrerbuch.evangelische-archive.de/data/brandenburg/',
-	      '/meta-pfarrerbuch.evangelische-archive.de/data/kps/',
-	      '/meta-pfarrerbuch.evangelische-archive.de/data/sachsen/',
-	     ];
 
 $protocol='http://'; // used for subject uri
-
+$uri_base='/meta-pfarrerbuch.evangelische-archive.de';
 $base='/data'; // used for base folder e.g. when used behind proxy e.g. /data/
 
 $uri=$_SERVER['REQUEST_URI'];
 if (strpos($uri, $base) !== 0) $uri = $base . $uri;
 else $base='';
+
+$endpoints = ['https://meta-pfarrerbuch.evangelische-archive.de/meta-daten/brandenburg/sparql',
+	       'https://meta-pfarrerbuch.evangelische-archive.de/meta-daten/kps/sparql',
+	       'https://meta-pfarrerbuch.evangelische-archive.de/meta-daten/sachsen/sparql',
+	     ];
+$resources = [$uri_base.'/data/brandenburg/',
+	      $uri_base.'/data/kps/',
+	      $uri_base.'/data/sachsen/',
+	     ];
+
+
 
 /* Content negotiation */
 
@@ -40,7 +43,7 @@ else {
 /* deliver content */
 function query($uri,$type) {
 
-	global $endpoints, $resources, $protocol, $base;
+	global $endpoints, $resources, $protocol, $base, $uri_base;
 
 	/* find sparql endpint for resource */	
 	$i=0;$needle='';
@@ -83,6 +86,7 @@ function query($uri,$type) {
 
 	curl_setopt($ch, CURLOPT_URL, $endpoint.'?query='.urlencode($sparql).'&format=json');
 	$response = curl_exec($ch);
+	curl_close($ch);
 
 	$json_result = json_decode($response);
 
@@ -94,15 +98,34 @@ function query($uri,$type) {
 	$template = str_replace('[title]',$json_result->results->bindings[0]->title->value, $template);
 
 
-	// Get the key-value-pairs
-	$sparql='SELECT DISTINCT ?p ?o  WHERE { <'.$subject.'> ?p ?o}';
+
+	$template = str_replace('[result]',
+		key_value_pairs('SELECT DISTINCT ?p ?o  WHERE { <'.$subject.'> ?p ?o}',$endpoint).
+		key_value_pairs('SELECT DISTINCT ?p ?o  WHERE { ?o ?p <'.$subject.'>}',$endpoint,true),
+		$template);
+	
+	echo $template;
+
+
+
+}
+
+function key_value_pairs($sparql,$endpoint,$inverse=false) {
+
+	global $resources, $protocol, $base, $uri_base ;
+
+	/* Get the key-value-pairs */
+	
+	/* init curl */
+	if (!function_exists('curl_init')) die('CURL is not installed!');
+	$ch= curl_init();
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	
 	curl_setopt($ch, CURLOPT_URL, $endpoint.'?query='.urlencode($sparql).'&format=json');
 	$response = curl_exec($ch);
 	
 	$json_result = json_decode($response);
 
-	$template = str_replace('[subject]',$subject, $template);
-	
 	curl_close($ch);
 
 
@@ -111,20 +134,36 @@ function query($uri,$type) {
 	$table = '';
 	
 	foreach ($json_result->results->bindings as $row) {
-		$table .= '<tr>';
-		$table .= '<td><a href="'.$row->p->value.'" uri="'.$row->p->value.'">'.$row->p->value.'</a></td>';
+		if ($inverse) $table .= '<tr class="inverse-property">';
+		else $table .= '<tr class="property">';
+		$table .= '<td><a class="resource extern" href="'.$row->p->value.'" uri="'.$row->p->value.'">'.$row->p->value.'</a></td>';
 		
 		if ($row->o->type=="literal") $table .= '<td>'.$row->o->value.'</td>';
-		else $table .= '<td><a href="'.$row->o->value.'">'.$row->o->value.'</a></td>';
-
+		else {
+			$uri=$row->o->value;
+			/* check if resource controlled by the tool */
+			$found = false;
+			foreach ($resources as $resource) {
+			    if (strpos($uri, $resource) !== false) {
+				$found = true;
+				break;
+			    }
+			}		
+			$class_resource='resource';
+			if ($found) {
+				$position = strpos($row->o->value, $uri_base);
+				/* remove full url to allow localhost-testing */
+				$uri= substr($row->o->value, $position + strlen($uri_base));
+				$class_resource .= ' intern';
+			}
+			else {
+				$class_resource .= ' extern';
+			}
+			$table .= '<td><a class="'.$class_resource.'" href="'.$uri.'">'.$row->o->value.'</a></td>';
+		}
 		$table .= '</tr>';
 	}
-
-	$template = str_replace('[result]',$table, $template);
 	
-	echo $template;
-
-
+	return $table;
 
 }
-

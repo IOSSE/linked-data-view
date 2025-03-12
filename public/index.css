@@ -32,3 +32,14 @@ border-radius: 3px 15px 5px 30px;
 h1 {
 	margin-top: 0px;
 }
+
+.inverse-property>td:first-child::before {
+    content: '←';
+    margin-right: 5px; /* Optional: Abstand zwischen dem Pfeil und dem Inhalt */
+}
+
+.property>td:first-child::before {
+    content: '→';
+    margin-right: 5px; /* Optional: Abstand zwischen dem Pfeil und dem Inhalt */
+}
+
