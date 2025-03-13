@@ -47,17 +47,18 @@ function query($uri,$type) {
 
 	/* find sparql endpint for resource */	
 	$i=0;$needle='';
+
 	do {
+		/* stop if no configuartion for this type of resource */
+		if ($i==count($resources)) {
+			echo "No configuration for LOD found.";
+			exit;
+		}
 		$needle = substr($resources[$i],strpos($resources[$i], '/', 1));
 		$contains = str_starts_with($uri, $needle);    
+
 	    	$i++;
-	} while (($i<count($resources)) and (!$contains) ) ;
-	
-	/* stop if no configuartion for this type of resource */
-	if ($i==count($resources)) {
-		echo "No configuration for LOD found.";
-		exit;
-	}
+	} while (!$contains)  ;
 	$i-=1;
 	
 	/* define SPARQL endpoint from config */
@@ -91,12 +92,20 @@ function query($uri,$type) {
 
 	$json_result = json_decode($response);
 
+	if (isset($json_result->results->bindings[0]->title->value)) {
+		$label = $json_result->results->bindings[0]->title->value;
+	}
+	else {
+		$label= $subject;
+	}
+		
 	if ($type=='label') {
-		echo $json_result->results->bindings[0]->title->value;
+		echo $label;
 		exit;
 	}
 	
-	$template = str_replace('[title]',$json_result->results->bindings[0]->title->value, $template);
+
+	$template = str_replace('[title]',$label, $template);
 
 
 
