@@ -1,5 +1,6 @@
 <?php
 header("access-control-allow-origin: *");
+header("Cache-Control: max-age=3600, public");
 
 /* Configuration */
 
