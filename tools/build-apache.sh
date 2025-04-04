@@ -1,2 +1,2 @@
 #!/bin/bash
-podman build -t php8-apache .
+podman build -t docker.io/php8-apache .
