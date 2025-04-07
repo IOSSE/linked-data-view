@@ -27,6 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const addWrapper = document.createElement("div");
     addWrapper.style.display = "flex";
     addWrapper.style.justifyContent = "center";
+    addWrapper.style.marginTop = "10px";
     addWrapper.appendChild(addButton);
   
     // Save Button (initially hidden)
@@ -36,7 +37,8 @@ document.addEventListener("DOMContentLoaded", () => {
     saveButton.style.marginTop = "10px";
     saveButton.style.padding = "4px 8px";
   
-    container.appendChild(addWrapper);
+    // Buttons platzieren
+    table.parentNode.insertBefore(addWrapper, table.nextSibling);
     container.appendChild(saveButton);
   
     editButton.addEventListener("click", () => {
