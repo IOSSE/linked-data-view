@@ -5,12 +5,12 @@ document.addEventListener("DOMContentLoaded", () => {
     editButton.textContent = "Bearbeiten";
     editButton.style.marginBottom = "10px";
     editButton.style.padding = "4px 8px";
+    editButton.style.borderRadius = "6px";
   
     const container = document.querySelector("div");
     container.insertBefore(editButton, container.firstChild);
   
     const table = document.querySelector("table");
-    const literalCells = document.querySelectorAll("td.literal");
   
     // Add + Button (initially hidden)
     const addButton = document.createElement("button");
@@ -22,8 +22,9 @@ document.addEventListener("DOMContentLoaded", () => {
     addButton.style.border = "1px solid #ccc";
     addButton.style.backgroundColor = "#fff";
     addButton.style.cursor = "pointer";
+    addButton.style.borderRadius = "6px";
   
-    // Wrapper für Zentrierung des Add-Buttons
+    // Wrapper für Add-Button
     const addWrapper = document.createElement("div");
     addWrapper.style.display = "flex";
     addWrapper.style.justifyContent = "center";
@@ -36,17 +37,48 @@ document.addEventListener("DOMContentLoaded", () => {
     saveButton.style.display = "none";
     saveButton.style.marginTop = "10px";
     saveButton.style.padding = "4px 8px";
+    saveButton.style.borderRadius = "6px";
   
     // Buttons platzieren
     table.parentNode.insertBefore(addWrapper, table.nextSibling);
     container.appendChild(saveButton);
   
-    editButton.addEventListener("click", () => {
+    function addDeleteButtonToRow(row) {
+      let deleteCell = row.querySelector(".delete-cell");
+      if (!deleteCell) {
+        deleteCell = document.createElement("td");
+        deleteCell.className = "delete-cell";
+        const deleteButton = document.createElement("button");
+        deleteButton.innerHTML = `<span style="color: red;">−</span>`;
+        deleteButton.style.padding = "2px 10px";
+        deleteButton.style.border = "1px solid #ccc";
+        deleteButton.style.backgroundColor = "#fff";
+        deleteButton.style.cursor = "pointer";
+        deleteButton.style.borderRadius = "6px";
+  
+        deleteButton.addEventListener("click", () => {
+          row.remove();
+        });
+  
+        deleteCell.appendChild(deleteButton);
+        row.appendChild(deleteCell);
+      }
+    }
+  
+    function makeTableEditable() {
+      const literalCells = document.querySelectorAll("td.literal");
       literalCells.forEach((element) => {
         const value = element.textContent;
         element.innerHTML = `<input type="text" value="${value}"/>`;
       });
   
+      document.querySelectorAll("tr").forEach(row => {
+        addDeleteButtonToRow(row);
+      });
+    }
+  
+    editButton.addEventListener("click", () => {
+      makeTableEditable();
       addButton.style.display = "inline-block";
       saveButton.style.display = "inline-block";
       editButton.disabled = true;
@@ -63,15 +95,18 @@ document.addEventListener("DOMContentLoaded", () => {
           <input type="text" value="Neuer Wert" />
         </td>
       `;
+      addDeleteButtonToRow(newRow);
       table.appendChild(newRow);
     });
   
     saveButton.addEventListener("click", () => {
-      const inputs = document.querySelectorAll("td.literal input");
-      inputs.forEach(input => {
+      document.querySelectorAll("td.literal input").forEach(input => {
         const td = input.parentElement;
         td.textContent = input.value;
       });
+  
+      // Entferne alle Löschbuttons
+      document.querySelectorAll(".delete-cell").forEach(cell => cell.remove());
   
       addButton.style.display = "none";
       saveButton.style.display = "none";
