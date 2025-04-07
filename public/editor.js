@@ -1,89 +1,79 @@
-// editor.js
+// Warte auf das Laden der Seite
 
-// Warte bis die Seite vollständig geladen ist
 document.addEventListener("DOMContentLoaded", () => {
     const editButton = document.createElement("button");
-    editButton.innerHTML = '<span style="margin-right:4px">✏️</span>Edit';
-    editButton.id = "editBtn";
-    editButton.style.margin = "10px";
-
-    const firstDiv = document.querySelector("div");
-    if (firstDiv) {
-        firstDiv.appendChild(editButton);
-    }
-
-    // Add button (+) unter die letzte Zeile
-    const addRowButton = document.createElement("button");
-    addRowButton.innerHTML = '<span style="margin-right:4px">➕</span>Add Row';
-    addRowButton.id = "addRowBtn";
-    addRowButton.style.marginTop = "20px";
-    addRowButton.style.display = "none"; // nur bei Edit sichtbar
-
-    // Save button (💾)
-    const saveButton = document.createElement("button");
-    saveButton.innerHTML = '<span style="margin-right:4px">💾</span>Save';
-    saveButton.id = "saveBtn";
-    saveButton.style.marginLeft = "10px";
-    saveButton.style.display = "none";
-
+    editButton.textContent = "Bearbeiten";
+    editButton.style.marginBottom = "10px";
+    editButton.style.padding = "4px 8px";
+  
+    const container = document.querySelector("div");
+    container.insertBefore(editButton, container.firstChild);
+  
     const table = document.querySelector("table");
-    if (table && table.parentNode) {
-        table.parentNode.appendChild(addRowButton);
-        table.parentNode.appendChild(saveButton);
-    }
-
-    // Literal-Zellen rot umrahmen (sichtbar ab Start)
     const literalCells = document.querySelectorAll("td.literal");
-    literalCells.forEach((cell) => {
-        cell.style.border = "2px solid red";
-    });
-
-    // Editiermodus aktivieren
+  
+    // Add + Button (initially hidden)
+    const addButton = document.createElement("button");
+    addButton.textContent = "+";
+    addButton.style.display = "none";
+    addButton.style.marginTop = "10px";
+    addButton.style.fontSize = "20px";
+    addButton.style.padding = "2px 12px";
+    addButton.style.border = "1px solid #ccc";
+    addButton.style.backgroundColor = "#fff";
+    addButton.style.cursor = "pointer";
+  
+    // Wrapper für Zentrierung des Add-Buttons
+    const addWrapper = document.createElement("div");
+    addWrapper.style.display = "flex";
+    addWrapper.style.justifyContent = "center";
+    addWrapper.appendChild(addButton);
+  
+    // Save Button (initially hidden)
+    const saveButton = document.createElement("button");
+    saveButton.textContent = "Speichern";
+    saveButton.style.display = "none";
+    saveButton.style.marginTop = "10px";
+    saveButton.style.padding = "4px 8px";
+  
+    container.appendChild(addWrapper);
+    container.appendChild(saveButton);
+  
     editButton.addEventListener("click", () => {
-        literalCells.forEach((cell) => {
-            const value = cell.textContent;
-            cell.innerHTML = `<input value="${value}" />`;
-        });
-        addRowButton.style.display = "inline-block";
-        saveButton.style.display = "inline-block";
+      literalCells.forEach((element) => {
+        const value = element.textContent;
+        element.innerHTML = `<input type="text" value="${value}"/>`;
+      });
+  
+      addButton.style.display = "inline-block";
+      saveButton.style.display = "inline-block";
+      editButton.disabled = true;
     });
-
-    // Zeile hinzufügen
-    addRowButton.addEventListener("click", () => {
-        const newRow = document.createElement("tr");
-        newRow.classList.add("property");
-
-        const newKey = document.createElement("td");
-        newKey.innerHTML = '<a href="#" class="resource">→ new:property</a>';
-
-        const newValue = document.createElement("td");
-        newValue.classList.add("literal");
-        newValue.innerHTML = '<input value="" />';
-
-        newRow.appendChild(newKey);
-        newRow.appendChild(newValue);
-
-        const tableBody = document.querySelector("table tbody") || document.querySelector("table");
-        tableBody.appendChild(newRow);
+  
+    addButton.addEventListener("click", () => {
+      const newRow = document.createElement("tr");
+      newRow.classList.add("property");
+      newRow.innerHTML = `
+        <td class="resource">
+          <a class="resource extern" href="#">Neue Eigenschaft</a>
+        </td>
+        <td class="literal">
+          <input type="text" value="Neuer Wert" />
+        </td>
+      `;
+      table.appendChild(newRow);
     });
-
-    // Speichern-Funktion (hier nur Demo – echte Speicherung muss ergänzt werden)
+  
     saveButton.addEventListener("click", () => {
-        const editedData = [];
-        const rows = document.querySelectorAll("tr.property");
-
-        rows.forEach(row => {
-            const key = row.querySelector("td:first-child a");
-            const input = row.querySelector("td.literal input");
-            if (key && input) {
-                editedData.push({
-                    property: key.getAttribute("href"),
-                    value: input.value
-                });
-            }
-        });
-
-        console.log("Edited data:", editedData);
-        alert("Changes saved (see console log)");
+      const inputs = document.querySelectorAll("td.literal input");
+      inputs.forEach(input => {
+        const td = input.parentElement;
+        td.textContent = input.value;
+      });
+  
+      addButton.style.display = "none";
+      saveButton.style.display = "none";
+      editButton.disabled = false;
     });
-});
+  });
+  
