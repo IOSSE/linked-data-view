@@ -1,7 +1,8 @@
-// config.js
-
 const config = {
-  protectedPredicates: ["rdf:type", "rdfs:label"],
+  protectedPredicates: [
+    "rdf:type", 
+    "rdfs:label"
+  ],
   properties: [
     "rdf:type",
     "rdfs:label",
@@ -12,7 +13,7 @@ const config = {
     "mpbv:Geburt"
   ],
   definelable: {
-    "mpbv:Pfarrer-in": "{mpv:nachname}, {mpc:vorname}:",
+    "mpbv:Pfarrer-in": "{mpbv:nachname}, {mpbv:vorname}:",
     "mpbv:Geburt": "Geboren am {mpbv:jahr}"
   }
 };
