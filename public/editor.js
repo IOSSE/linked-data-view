@@ -9,10 +9,18 @@ document.addEventListener("DOMContentLoaded", () => {
   saveButton.textContent = "Speichern";
   saveButton.className = "save_button hidden";
   
+  // Plus-Button erstellen
+  const plusButton = document.createElement("button");
+  plusButton.textContent = "+";
+  plusButton.className = "plus-button hidden"; 
+
   // Button einfügen
   const container = document.querySelector("div");
   container.insertBefore(saveButton, container.firstChild);
   container.insertBefore(editButton, container.firstChild);
+
+  const table = document.querySelector("table");
+  table.insertAdjacentElement("afterend", plusButton);
 
   
   // Button-Klick zum Editieren
@@ -64,10 +72,12 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   
   editButton.classList.replace("visible", "hidden");
+  plusButton.classList.replace("hidden", "visible");
   saveButton.classList.replace("hidden", "visible");
+  
 
   });
-// SPEICHERN klicken
+ // SPEICHERN klicken
  saveButton.addEventListener("click", () => {
   const inputs = document.querySelectorAll("td.literal input");
   inputs.forEach((input) => {
@@ -75,11 +85,48 @@ document.addEventListener("DOMContentLoaded", () => {
     cell.textContent = input.value;
   });
 
-  // Buttons tauschen: Speichern verstecken, Bearbeiten anzeigen
+   // Auswahl durch Text ersetzen
+   const selects = document.querySelectorAll("td select");
+   selects.forEach((select) => {
+     const selectedValue = select.value;
+     const cell = select.parentElement;
+     cell.textContent = selectedValue;
+   });
+
+  // Buttons tauschen
   saveButton.classList.replace("visible", "hidden");
+  plusButton.classList.replace("visible", "hidden");
   editButton.classList.replace("hidden", "visible");
- });
-});
   
+ });
+  // Neue Zeile hinzufügen
+  plusButton.addEventListener("click", () => {
+    const newRow = document.createElement("tr");
+    newRow.className = "property"; 
+  
+    const propertyCell = document.createElement("td");
+    const select = document.createElement("select");
+  
+    config.properties.forEach((prop) => {
+      const option = document.createElement("option");
+      option.value = prop;
+      option.textContent = prop;
+      select.appendChild(option);
+    });
+  
+    propertyCell.appendChild(select);
+  
+    const valueCell = document.createElement("td");
+    valueCell.className = "literal";
+    const input = document.createElement("input");
+    input.type = "text";
+    valueCell.appendChild(input);
+  
+    newRow.appendChild(propertyCell);
+    newRow.appendChild(valueCell);
+    table.appendChild(newRow);
+  });
+  
+});
   
   

@@ -9,7 +9,8 @@ const config = {
     "mpbv:hatLebensabschnitt",
     "mpbv:vorname",
     "mpbv:nachname",
-    "mpbv:Pfarrer-in",
+    "mpbv:datum",	
+    "mpbv:jahr",
     "mpbv:Geburt"
   ],
   definelable: {
