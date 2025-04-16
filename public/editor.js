@@ -14,6 +14,11 @@ document.addEventListener("DOMContentLoaded", () => {
   plusButton.textContent = "+";
   plusButton.className = "plus-button hidden"; 
 
+  // Minus-Button erstellen
+  const minusButton = document.createElement("button");
+  minusButton.textContent = "−";
+  minusButton.className = "minus-button";
+
   // Button einfügen
   const container = document.querySelector("div");
   container.insertBefore(saveButton, container.firstChild);
@@ -36,6 +41,31 @@ document.addEventListener("DOMContentLoaded", () => {
    } else {
      element.innerHTML = `<input type="text" value="${value}"/>`;
      }
+  });
+  
+  // Minus-Button zu bestehenden bearbeitbaren Zeilen hinzufügen
+  const rows = document.querySelectorAll("tr");
+  rows.forEach((row) => {
+    const predicate = row.children[0]?.textContent?.trim();
+    const isProtected = config.protectedPredicates.includes(predicate);
+    const isEditable = row.children[1]?.classList.contains("literal");
+    const isCustom = row.classList.contains("custom");
+
+    // Nur Zeilen mit editierbarem Literal und nicht geschützt
+    if (isEditable && !isProtected || isCustom) {
+      // Falls noch kein Minus-Button vorhanden ist
+      if (!row.querySelector(".minus-button")) {
+        const minusButtonCell = document.createElement("td");
+        const minusButton = document.createElement("button");
+        minusButton.textContent = "−";
+        minusButton.className = "minus-button";
+        minusButton.addEventListener("click", () => {
+          row.remove();
+        });
+        minusButtonCell.appendChild(minusButton);
+        row.appendChild(minusButtonCell);
+      }
+    }
   });
   
   // Prüfen, ob erste Zeile rdf:type = mpbv:Pfarrer-in ist
@@ -93,16 +123,23 @@ document.addEventListener("DOMContentLoaded", () => {
      cell.textContent = selectedValue;
    });
 
+  // Alle Minus-Buttons entfernen
+  document.querySelectorAll(".minus-button").forEach(btn => {
+    btn.parentElement.remove();
+  });
+  
   // Buttons tauschen
   saveButton.classList.replace("visible", "hidden");
   plusButton.classList.replace("visible", "hidden");
   editButton.classList.replace("hidden", "visible");
   
  });
+
+ 
   // Neue Zeile hinzufügen
   plusButton.addEventListener("click", () => {
     const newRow = document.createElement("tr");
-    newRow.className = "property"; 
+    newRow.classList.add("property", "custom");
   
     const propertyCell = document.createElement("td");
     const select = document.createElement("select");
@@ -125,6 +162,16 @@ document.addEventListener("DOMContentLoaded", () => {
     newRow.appendChild(propertyCell);
     newRow.appendChild(valueCell);
     table.appendChild(newRow);
+
+    // Neue Zeile löschen
+    const minusButtonCell = document.createElement("td");
+    minusButton.addEventListener("click", () => {
+    newRow.remove();
+    });
+    minusButtonCell.appendChild(minusButton);
+    newRow.appendChild(minusButtonCell);
+
+    
   });
   
 });

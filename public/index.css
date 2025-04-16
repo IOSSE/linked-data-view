@@ -19,11 +19,20 @@
 	border: none;
 	border-radius: 6px;
 	cursor: pointer;
-  }
-  .plus-button.visible {
+}
+.plus-button.visible {
 	display: block;
-  }
+}
 
+.minus-button {
+	background-color: transparent;
+	border: none;
+	color: red;
+	font-size: 20px;
+	cursor: pointer;
+	padding-left: 5%;
+}
+  
 html {
 
 	font-family: sans-serif; 
