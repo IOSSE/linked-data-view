@@ -14,33 +14,35 @@ document.addEventListener("DOMContentLoaded", () => {
   plusButton.textContent = "+";
   plusButton.className = "plus-button hidden"; 
 
-  // Minus-Button erstellen
-  const minusButton = document.createElement("button");
-  minusButton.textContent = "−";
-  minusButton.className = "minus-button";
+  // Abbrechen-Button erstellen
+  const cancelButton = document.createElement("button");
+  cancelButton.textContent = "Abbrechen"; // Neuer Button
+  cancelButton.className = "cancel_button hidden"; // Am Anfang verstecken
 
   // Button einfügen
   const container = document.querySelector("div");
+  const table = document.querySelector("table");
   container.insertBefore(saveButton, container.firstChild);
   container.insertBefore(editButton, container.firstChild);
-
-  const table = document.querySelector("table");
+  container.insertBefore(cancelButton, saveButton.nextSibling);
   table.insertAdjacentElement("afterend", plusButton);
 
   
+  let originalTableHTML = "";
   // Button-Klick zum Editieren
   editButton.addEventListener("click", () => {
-  const literalCells = document.querySelectorAll("td.literal");
+    originalTableHTML = table.innerHTML;
+    const literalCells = document.querySelectorAll("td.literal");
   
-  literalCells.forEach((element) => {
-  const value = element.textContent;
-  const predicate = element.previousElementSibling;
+    literalCells.forEach((element) => {
+     const value = element.textContent;
+     const predicate = element.previousElementSibling;
   
-   if (config.protectedPredicates.includes(predicate.textContent)) {
-     console.log(predicate.textContent);
-   } else {
-     element.innerHTML = `<input type="text" value="${value}"/>`;
-     }
+     if (config.protectedPredicates.includes(predicate.textContent)) {
+      console.log(predicate.textContent);
+     } else {
+        element.innerHTML = `<input type="text" value="${value}"/>`;
+        }
   });
   
   // Minus-Button zu bestehenden bearbeitbaren Zeilen hinzufügen
@@ -104,6 +106,7 @@ document.addEventListener("DOMContentLoaded", () => {
   editButton.classList.replace("visible", "hidden");
   plusButton.classList.replace("hidden", "visible");
   saveButton.classList.replace("hidden", "visible");
+  cancelButton.classList.replace("hidden", "visible");
   
 
   });
@@ -115,26 +118,39 @@ document.addEventListener("DOMContentLoaded", () => {
     cell.textContent = input.value;
   });
 
-   // Auswahl durch Text ersetzen
-   const selects = document.querySelectorAll("td select");
-   selects.forEach((select) => {
-     const selectedValue = select.value;
+  // Auswahl durch Text ersetzen
+  const selects = document.querySelectorAll("td select");
+  selects.forEach((select) => {
+    const selectedValue = select.value;
      const cell = select.parentElement;
      cell.textContent = selectedValue;
    });
+   
+    // Nach Speichern: Minus-Buttons entfernen
+    document.querySelectorAll(".minus-button").forEach(btn => {
+      btn.parentElement.remove();
+    });
 
-  // Alle Minus-Buttons entfernen
-  document.querySelectorAll(".minus-button").forEach(btn => {
-    btn.parentElement.remove();
-  });
-  
-  // Buttons tauschen
-  saveButton.classList.replace("visible", "hidden");
-  plusButton.classList.replace("visible", "hidden");
-  editButton.classList.replace("hidden", "visible");
-  
- });
+    plusButton.classList.replace("visible", "hidden");
+    saveButton.classList.replace("visible", "hidden");
+    cancelButton.classList.replace("visible", "hidden");
+    editButton.classList.replace("hidden", "visible");
 
+    // Tabelle jetzt als neue Originalversion speichern
+    originalTableHTML = table.innerHTML;
+  });;
+    
+
+  // Abbrechen klicken
+  cancelButton.addEventListener("click", () => {
+    table.innerHTML = originalTableHTML;
+  
+    // Buttons wieder zurückschalten
+    saveButton.classList.replace("visible", "hidden");
+    plusButton.classList.replace("visible", "hidden");
+    editButton.classList.replace("hidden", "visible");
+    cancelButton.classList.replace("visible", "hidden");
+  });  
  
   // Neue Zeile hinzufügen
   plusButton.addEventListener("click", () => {
@@ -165,6 +181,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Neue Zeile löschen
     const minusButtonCell = document.createElement("td");
+    const minusButton = document.createElement("button");
+    minusButton.textContent = "−";
+    minusButton.className = "minus-button";
     minusButton.addEventListener("click", () => {
     newRow.remove();
     });
