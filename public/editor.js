@@ -29,6 +29,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   
   let originalTableHTML = "";
+  
   // Button-Klick zum Editieren
   editButton.addEventListener("click", () => {
     originalTableHTML = table.innerHTML;
@@ -45,64 +46,96 @@ document.addEventListener("DOMContentLoaded", () => {
         }
   });
   
-  // Minus-Button zu bestehenden bearbeitbaren Zeilen hinzufügen
-  const rows = document.querySelectorAll("tr");
-  rows.forEach((row) => {
-    const predicate = row.children[0]?.textContent?.trim();
-    const isProtected = config.protectedPredicates.includes(predicate);
-    const isEditable = row.children[1]?.classList.contains("literal");
-    const isCustom = row.classList.contains("custom");
+    // Minus-Button zu bestehenden bearbeitbaren Zeilen hinzufügen
+    const rows = document.querySelectorAll("tr");
+    rows.forEach((row) => {
+      const predicate = row.children[0]?.textContent?.trim();
+      const isProtected = config.protectedPredicates.includes(predicate);
+      const isEditable = row.children[1]?.classList.contains("literal");
+      const isCustom = row.classList.contains("custom");
 
-    // Nur Zeilen mit editierbarem Literal und nicht geschützt
-    if (isEditable && !isProtected || isCustom) {
-      // Falls noch kein Minus-Button vorhanden ist
-      if (!row.querySelector(".minus-button")) {
-        const minusButtonCell = document.createElement("td");
-        const minusButton = document.createElement("button");
-        minusButton.textContent = "−";
-        minusButton.className = "minus-button";
-        minusButton.addEventListener("click", () => {
-          row.remove();
-        });
-        minusButtonCell.appendChild(minusButton);
-        row.appendChild(minusButtonCell);
+      // Nur Zeilen mit editierbarem Literal und nicht geschützt
+      if (isEditable && !isProtected || isCustom) {
+        // Falls noch kein Minus-Button vorhanden ist
+        if (!row.querySelector(".minus-button")) {
+          const minusButtonCell = document.createElement("td");
+          const minusButton = document.createElement("button");
+          minusButton.textContent = "−";
+          minusButton.className = "minus-button";
+          minusButton.addEventListener("click", () => {
+            row.remove();
+          });
+          minusButtonCell.appendChild(minusButton);
+          row.appendChild(minusButtonCell);
+        }
       }
-    }
-  });
-  
-  // Prüfen, ob erste Zeile rdf:type = mpbv:Pfarrer-in ist
-  const ersteZeile = document.querySelectorAll("tr")[0];
-  const erstesPraedikat = ersteZeile?.children[0]?.textContent.trim();
-  const ersterWert = ersteZeile?.children[1]?.textContent.trim();
-  
-  if (erstesPraedikat === "rdf:type" && ersterWert === "mpbv:Pfarrer-in") {
-  // Relevante Zellen finden
-  const labelCell = [...document.querySelectorAll("td")].find(td =>
-  td.previousElementSibling?.textContent.trim() === "rdfs:label"
-  );
-  
-  const vornameInput = [...document.querySelectorAll("td")].find(td =>
-  td.previousElementSibling?.textContent.trim() === "mpbv:vorname"
-  )?.querySelector("input");
-  
-  const nachnameInput = [...document.querySelectorAll("td")].find(td =>
-  td.previousElementSibling?.textContent.trim() === "mpbv:nachname"
-  )?.querySelector("input");
-  
-  const updateLabel = () => {
-    if (labelCell && vornameInput && nachnameInput) {
-    const originalText = labelCell.textContent;
-    const match = originalText.match(/\(.*?\)$/); // alles in () am Ende
-    const rest = match ? " " + match[0] : "";
-    labelCell.textContent = `${nachnameInput.value}, ${vornameInput.value}${rest}`;
+    });
+    
+    // Prüfen, ob erste Zeile rdf:type = mpbv:Pfarrer-in ist
+    const ersteZeile = document.querySelectorAll("tr")[0];
+    const erstesPraedikat = ersteZeile?.children[0]?.textContent.trim();
+    const ersterWert = ersteZeile?.children[1]?.textContent.trim();
+    
+    if (erstesPraedikat === "rdf:type" && ersterWert === "mpbv:Pfarrer-in") {
+    // Relevante Zellen finden
+    const labelCell = [...document.querySelectorAll("td")].find(td =>
+    td.previousElementSibling?.textContent.trim() === "rdfs:label"
+    );
+    
+    const vornameInput = [...document.querySelectorAll("td")].find(td =>
+    td.previousElementSibling?.textContent.trim() === "mpbv:vorname"
+    )?.querySelector("input");
+    
+    const nachnameInput = [...document.querySelectorAll("td")].find(td =>
+    td.previousElementSibling?.textContent.trim() === "mpbv:nachname"
+    )?.querySelector("input");
+    
+    const updateLabel = () => {
+      if (labelCell && vornameInput && nachnameInput) {
+      const originalText = labelCell.textContent;
+      const match = originalText.match(/\(.*?\)$/); // alles in () am Ende
+      const rest = match ? " " + match[0] : "";
+      labelCell.textContent = `${nachnameInput.value}, ${vornameInput.value}${rest}`;
+      };
     };
-  };
-  
-  // Event Listener für Live-Update
-  vornameInput?.addEventListener("input", updateLabel);
-  nachnameInput?.addEventListener("input", updateLabel);
-  }
-  
+    
+    // Event Listener für Live-Update
+    vornameInput?.addEventListener("input", updateLabel);
+    nachnameInput?.addEventListener("input", updateLabel);
+    }
+    
+    // Prüfen, ob rdf:type = mpbv:Geburt
+    const ersteZeileGeburt = document.querySelectorAll("tr")[0];
+    const praedikatGeburt = ersteZeileGeburt?.children[0]?.textContent.trim();
+    const wertGeburt = ersteZeileGeburt?.children[1]?.textContent.trim();
+
+    if (praedikatGeburt === "rdf:type" && wertGeburt === "mpbv:Geburt") {
+      const labelCellGeburt = [...document.querySelectorAll("td")].find(td =>
+        td.previousElementSibling?.textContent.trim() === "rdfs:label"
+      );
+
+      const datumInput = [...document.querySelectorAll("td")].find(td =>
+        td.previousElementSibling?.textContent.trim() === "mpbv:datum"
+      )?.querySelector("input");
+
+      const updateGeburtsLabel = () => {
+        if (labelCellGeburt && datumInput) {
+          const year = datumInput.value.slice(0, 4);
+          labelCellGeburt.textContent = `geboren ${year}`;
+
+          // Zusätzlich: Anderes Label wie "Müller, Dora (*1913-†2001)" anpassen
+          const andereLabelZelle = [...document.querySelectorAll("td")].find(td =>
+            td.textContent.includes("(*") && td.previousElementSibling?.textContent.trim() === "rdfs:label"
+          );
+          if (andereLabelZelle) {
+            andereLabelZelle.textContent = andereLabelZelle.textContent.replace(/\(\*\d{4}/, `(*${year}`);
+          }
+        }
+      };
+
+      datumInput?.addEventListener("input", updateGeburtsLabel);
+    }
+
   editButton.classList.replace("visible", "hidden");
   plusButton.classList.replace("hidden", "visible");
   saveButton.classList.replace("hidden", "visible");
