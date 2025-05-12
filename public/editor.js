@@ -28,10 +28,12 @@ document.addEventListener("DOMContentLoaded", () => {
   table.insertAdjacentElement("afterend", plusButton);
 
   // Wiederherstellung bei Seiten-Neuladen
-  const savedTable = localStorage.getItem("rdfTable");
-  if (savedTable) {
-    table.innerHTML = savedTable;
-  }
+  const pageKey = "rdfTable_" + window.location.pathname.split("/").pop().replace(".html", "");
+const savedTable = localStorage.getItem(pageKey);
+if (savedTable) {
+  table.innerHTML = savedTable;
+}
+
   
   let originalTableHTML = "";
   
@@ -216,7 +218,7 @@ document.addEventListener("DOMContentLoaded", () => {
     originalTableHTML = table.innerHTML;
 
     // Tabelle im Browser speichern
-    localStorage.setItem("rdfTable", table.innerHTML);
+    localStorage.setItem(pageKey, table.innerHTML);
     originalTableHTML = table.innerHTML;
      
    
