@@ -15,7 +15,7 @@ body {
 	background-color: #b3d4fc;
 }
 
-body>div {
+header, footer, main {
 	width:90%;
 	margin: 1% auto 0 auto;;
 	background-color: #FFF;
@@ -25,7 +25,7 @@ body>div {
 
 }
 
-body>div:first-child {
+header {
 	width:90%;
 	margin: 0 auto;
 	padding: 1em 1em 0 1em ;
