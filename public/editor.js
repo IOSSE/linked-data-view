@@ -149,6 +149,11 @@ function loadFromStore() {
 
 }
 
+function removeStorage() {
+    localStorage.clear();
+    window.location.reload(true);
+}
+
 
 document.addEventListener('DOMContentLoaded', function() {
 
@@ -178,11 +183,24 @@ document.addEventListener('DOMContentLoaded', function() {
             cancelButton.textContent = 'Abbrechen';
             cancelButton.disabled= true;
 
+            const removeButton = document.createElement('button');
+            removeButton.id = 'removeButton';
+            removeButton.textContent = 'Änderungen verwerfen';
+            removeButton.disabled= true;
+
+            const commitButton = document.createElement('button');
+            commitButton.id = 'commitButton';
+            commitButton.textContent = 'Änderungen übertragen';
+            commitButton.disabled= true;
+
 
             // Die Schaltflächen dem <nav>-Element hinzufügen
             nav.appendChild(editButton);
             nav.appendChild(saveButton);
             nav.appendChild(cancelButton);
+            nav.appendChild(removeButton);
+            nav.appendChild(commitButton);
+
 
             // Das <nav>-Element dem <header> hinzufügen
             const header = document.querySelector('header');
@@ -194,6 +212,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 editButton.disabled = true;
                 saveButton.disabled = false;
                 cancelButton.disabled = false;
+                removeButton.disabled = false;
                 editResource();
 
             });
@@ -203,6 +222,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 editButton.disabled = false;
                 saveButton.disabled = true;
                 cancelButton.disabled = true;
+                removeButton.disabled = true;
                 saveResource();
             });
 
@@ -211,7 +231,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 editButton.disabled = false;
                 saveButton.disabled = true;
                 cancelButton.disabled = true;
+                removeButton.disabled = true;
                 cancelResource();
+            });
+
+            removeButton.addEventListener('click', function() {
+                console.log('Änderungen verwerfen');
+                editButton.disabled = false;
+                saveButton.disabled = true;
+                cancelButton.disabled = true;
+                removeButton.disabled = true;
+                removeStorage();
             });
         });
 
