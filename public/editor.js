@@ -220,6 +220,9 @@ if (savedTable) {
     // Tabelle im Browser speichern
     localStorage.setItem(pageKey, table.innerHTML);
     originalTableHTML = table.innerHTML;
+
+    // 💾 ==> Jetzt auf Fuski speichern:
+    saveToFuski(pageKey, table.innerHTML);
      
    
   });
@@ -268,4 +271,40 @@ if (savedTable) {
     newRow.appendChild(minusButtonCell);
     table.appendChild(newRow);
   });
+  async function saveToFuski(pageKey, tableHTML) {
+    try {
+      // Erkennen, ob es Sachsen, Brandenburg oder KPS ist
+      let basePath = "";
+      if (window.location.pathname.includes("/sachsen/")) {
+        basePath = "sachsen";
+      } else if (window.location.pathname.includes("/brandenburg/")) {
+        basePath = "brandenburg";
+      } else if (window.location.pathname.includes("/kps/")) {
+        basePath = "kps";
+      } else {
+        console.error("Unbekannter Pfad für Fuski-Speichern!");
+        return;
+      }
+  
+      const response = await fetch(`/${basePath}/save.php`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          page: pageKey,
+          content: tableHTML,
+        }),
+      });
+  
+      if (response.ok) {
+        console.log("Speichern auf dem Server erfolgreich!");
+      } else {
+        console.error("Fehler beim Speichern auf dem Server:", response.statusText);
+      }
+    } catch (error) {
+      console.error("Fehler beim Speichern auf dem Server:", error);
+    }
+  }
+  
 });

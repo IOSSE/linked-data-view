@@ -6,16 +6,16 @@ header("Cache-Control: max-age=3600, public");
 
 
 $protocol='http://'; // used for subject uri
-$uri_base='/meta-pfarrerbuch.evangelische-archive.de';
+$uri_base='http://localhost:3030';
 $base='/data'; // used for base folder e.g. when used behind proxy e.g. /data/
 
 $uri=$_SERVER['REQUEST_URI'];
 if (strpos($uri, $base) !== 0) $uri = $base . $uri;
 else $base='';
-
-$endpoints = ['https://meta-pfarrerbuch.evangelische-archive.de/meta-daten/brandenburg/sparql',
-	       'https://meta-pfarrerbuch.evangelische-archive.de/meta-daten/kps/sparql',
-	       'https://meta-pfarrerbuch.evangelische-archive.de/meta-daten/sachsen/sparql',
+//'https://meta-pfarrerbuch.evangelische-archive.de/meta-daten/brandenburg/sparql'
+$endpoints = ['http://fuseki:3030/brandenburg/sparql',
+	'http://fuseki:3030/kps/sparql',
+	'http://fuseki:3030/sachsen/sparql',
 	     ];
 $resources = [$uri_base.'/data/brandenburg/',
 	      $uri_base.'/data/kps/',
@@ -133,11 +133,13 @@ function key_value_pairs($sparql,$endpoint,$inverse=false) {
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 	
 	curl_setopt($ch, CURLOPT_URL, $endpoint.'?query='.urlencode($sparql).'&format=json');
+
 	$response = curl_exec($ch);
 	
 	$json_result = json_decode($response);
 
 	curl_close($ch);
+	var_dump($response);
 
 
 
