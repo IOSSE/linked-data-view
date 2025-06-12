@@ -2,151 +2,255 @@
 var resource = '';
 
 function editResource() {
-
-   const literalCells = document.querySelectorAll("td.literal");
-   literalCells.forEach((element) => {
+    const literalCells = document.querySelectorAll("td.literal");
+    literalCells.forEach((element) => {
         const value = replaceQuotes(element.textContent);
         const predicate = element.previousElementSibling;
         element.setAttribute('save', value);
-        
+
         if (!config.protectedPredicates.includes(predicate.textContent)) {
             element.innerHTML = `<input type="text" value="${value}"/>`;
         }
-    })
+
+        // Nur im Bearbeitungsmodus Minus-Button einfügen (falls nicht vorhanden)
+        const predicateText = element.previousElementSibling.textContent;
+
+    // Nur wenn das Prädikat **nicht** geschützt ist
+    if (!config.protectedPredicates.includes(predicateText) && !element.parentElement.querySelector('.minus-button')) {
+    const minusButton = document.createElement('button');
+    minusButton.textContent = '−';
+    minusButton.classList.add('minus-button');
+    minusButton.addEventListener('click', () => {
+        localStorage.setItem(resource + '$delete$' + predicateText, '');
+        element.parentElement.remove();
+    });
+
+    const minusCell = document.createElement('td');
+    minusCell.appendChild(minusButton);
+    element.parentElement.appendChild(minusCell);
+    }
+
+    });
+
+    insertPlusButtonRow();
 }
 
 function saveResource() {
-
- 
-
     const literalCells = document.querySelectorAll("td.literal");
     literalCells.forEach((element) => {
-        const inputElement = element.firstElementChild;
+        const inputElement = element.querySelector('input');
         let value;
         if (inputElement) {
             value = replaceQuotes(inputElement.value);
-        } 
-        else {
-            value = replaceQuotes(element.textContent);   
-        }       
-        const predicate = element.previousElementSibling;
-        // Füge diese Werte dem Storage hinzu wenn er sich verändert hat
-        if (value!=element.getAttribute('save')) {
-            element.classList.add('new');
-            localStorage.setItem(resource+'$'+predicate.textContent, value);
+        } else {
+            value = replaceQuotes(element.textContent);
         }
+
+        const predicateCell = element.previousElementSibling;
+        const pred = predicateCell.querySelector('select')?.value || predicateCell.textContent;
+
+        if (value !== element.getAttribute('save')) {
+            element.classList.add('new');
+            localStorage.setItem(resource + '$' + pred, value);
+        }
+
+        // Bei neuen Zeilen ohne vorherigen "save"-Wert trotzdem speichern
+        if (!element.hasAttribute('save')) {
+            element.classList.add('new');
+            localStorage.setItem(resource + '$' + pred, value);
+        }
+
         element.innerHTML = value;
-        
-    })
+    });
 
-    // Überprüfe ob das Lebel gemäß der definierten Regeln angepasst werden muss
     checkLabel();
-
-
-
-
+    removePlusButtonRow();
 }
 
 function cancelResource() {
-
     const literalCells = document.querySelectorAll("td.literal");
     literalCells.forEach((element) => {
-       element.innerHTML = element.getAttribute('save');
+        element.innerHTML = element.getAttribute('save');
     });
 
+    removePlusButtonRow();
+}
+
+function insertPlusButtonRow() {
+    if (document.getElementById('plus-row')) return;
+
+    const table = document.querySelector('table');
+    const row = document.createElement('tr');
+    row.id = 'plus-row';
+
+    const td = document.createElement('td');
+    td.colSpan = 3;
+    td.classList.add('plus-button-cell');
+
+    const plusButton = document.createElement('button');
+    plusButton.textContent = '+';
+    plusButton.classList.add('plus-button');
+    plusButton.addEventListener("click", () => {
+        const newRow = document.createElement("tr");
+        newRow.classList.add("property", "custom");
+      
+        const propertyCell = document.createElement("td");
+        const select = document.createElement("select");
+      
+        config.properties.forEach((prop) => {
+          const option = document.createElement("option");
+          option.value = prop;
+          option.textContent = prop;
+          select.appendChild(option);
+        });
+      
+        propertyCell.appendChild(select);
+      
+        const valueCell = document.createElement("td");
+        valueCell.className = "literal";
+        const input = document.createElement("input");
+        input.type = "text";
+        valueCell.appendChild(input);
+      
+        const minusCell = document.createElement("td");
+        const minusButton = document.createElement("button");
+        minusButton.textContent = "−";
+        minusButton.className = "minus-button";
+        minusButton.addEventListener("click", () => newRow.remove());
+        minusCell.appendChild(minusButton);
+      
+        newRow.appendChild(propertyCell);
+        newRow.appendChild(valueCell);
+        newRow.appendChild(minusCell);
+      
+        table.appendChild(newRow);
+      });
+      
+
+    td.appendChild(plusButton);
+    row.appendChild(td);
+    table.appendChild(row);
+}
+
+function removePlusButtonRow() {
+    const plusRow = document.getElementById('plus-row');
+    if (plusRow) {
+        plusRow.remove();
+    }
 }
 
 function checkLabel() {
-
-    // Ermittel rdf:type
     const rdfTypeElement = document.querySelector('td.resource a[uri="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"]');
-    
+
     if (rdfTypeElement) {
-        // Textinhalt oder anderer Wert, je nachdem, was du benötigst
         const rdfTypeValue = rdfTypeElement.parentElement.nextElementSibling.textContent.trim();
         const labelConstruct = config.defineLabel[rdfTypeValue];
         if (labelConstruct) {
-
             let value;
-            // Funktion, um die Platzhalter durch die entsprechenden Werte zu ersetzen
             const replacedText = labelConstruct.replace(/{(.*?)}/g, (match, key) => {
-                // Versuche, den Wert aus dem Objekt zu holen
                 if (key.startsWith('fkt_')) {
-                    // Überprüfen, ob diese Funktion im globalen Objekt existiert
                     if (typeof globalThis[key] === 'function') {
-                        // Funktion dynamisch ausführen
                         value = globalThis[key]();
+                    } else {
+                        console.warn(`Keine Funktion namens ${key} definiert.`);
                     }
-                    else {
-                            console.warn(`Keine Funktion namens ${functionName} definiert.`);
-                        }
-                }
-                else {
-                    const keyValue = document.querySelector('td.resource a[uri="'+key+'"]');
+                } else {
+                    const keyValue = document.querySelector('td.resource a[uri="' + key + '"]');
                     if (keyValue) {
                         value = keyValue.parentElement.nextElementSibling.textContent.trim();
+                    } else {
+                        value = '';
                     }
-                    else {
-                        value='';
-                    } 
                 }
-                // Gibt entweder den gefundenen Wert oder den Original-Placeholder zurück (falls keiner gefunden wurde)
                 return value !== undefined ? value : match;
             });
-            console.log(replacedText);
+
             const labelElementKey = document.querySelector('td.resource a[uri="http://www.w3.org/2000/01/rdf-schema#label"]');
             if (labelElementKey) {
                 const labelElement = labelElementKey.parentElement.nextElementSibling;
-                if (labelElement.textContent!=replacedText) {
+                if (labelElement.textContent !== replacedText) {
                     labelElement.textContent = replacedText;
                     labelElement.classList.add('new');
                     document.title = replacedText;
                     document.querySelector('h1').textContent = replacedText;
-                    localStorage.setItem(resource+'$rdfs:label', replacedText);
+                    localStorage.setItem(resource + '$rdfs:label', replacedText);
                 }
             }
-             
-
         }
     }
-
-
 }
 
 function loadFromStore() {
-
-    // Literals
     const literalCells = document.querySelectorAll("td.literal");
     literalCells.forEach((element) => {
         const predicate = element.previousElementSibling;
-        const value = localStorage.getItem(resource+'$'+predicate.textContent);
-         if (value !== null) {
+        const pred = predicate.textContent;
+
+        // Überspringe gelöschte Einträge
+        if (localStorage.getItem(resource + '$delete$' + pred) !== null) {
+            element.parentElement.remove();
+            return;
+        }
+
+        const value = localStorage.getItem(resource + '$' + pred);
+        if (value !== null) {
             element.textContent = value;
             element.classList.add('new');
-            if (predicate.textContent=='rdfs:label') {
+            if (pred === 'rdfs:label') {
                 document.title = value;
-                // Auswahl des ersten <h1>-Elements
                 const firstH1 = document.querySelector('h1');
-                console.log(firstH1.textContent);
                 firstH1.textContent = value;
-            }        
+            }
         }
-    })    
+    });
 
-    // Resources
     const resourceCells = document.querySelectorAll("a.resource.intern");
     resourceCells.forEach((element) => {
         const predicate = element.parentElement.previousElementSibling;
-      
-        const value = localStorage.getItem(element.getAttribute('uri')+'$rdfs:label');
+        const value = localStorage.getItem(element.getAttribute('uri') + '$rdfs:label');
         if (value !== null) {
             element.textContent = value;
             element.parentElement.classList.add('new');
         }
-    })    
+    });
+    // Neue Zeilen aus dem localStorage ergänzen
+for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+
+    if (key.startsWith(resource + '$') && !key.includes('$delete$')) {
+        const pred = key.split('$')[1];
+        const value = localStorage.getItem(key);
+
+        // Falls Prädikat bereits in der Tabelle, überspringen
+        const existing = Array.from(document.querySelectorAll("td.literal")).some(cell => {
+            const existingPred = cell.previousElementSibling.textContent;
+            return existingPred === pred;
+        });
+        if (existing) continue;
+
+        const table = document.querySelector('table');
+        const newRow = document.createElement("tr");
+        newRow.classList.add("property");
+
+        const propertyCell = document.createElement("td");
+        propertyCell.textContent = pred;
+
+        const valueCell = document.createElement("td");
+        valueCell.className = "literal new";
+        valueCell.textContent = value;
+
+        const dummyCell = document.createElement("td"); // drittes leeres Feld
+
+        newRow.appendChild(propertyCell);
+        newRow.appendChild(valueCell);
+        newRow.appendChild(dummyCell);
+
+        table.appendChild(newRow);
+    }
+}
+
 
     checkLabel();
-
 }
 
 function removeStorage() {
@@ -154,98 +258,89 @@ function removeStorage() {
     window.location.reload(true);
 }
 
+document.addEventListener('DOMContentLoaded', function () {
+    resource = document.getElementById('resource').textContent;
+    loadFromStore();
 
-document.addEventListener('DOMContentLoaded', function() {
+    const nav = document.createElement('nav');
 
+    const editButton = document.createElement('button');
+    editButton.id = 'editButton';
+    editButton.textContent = 'Bearbeiten';
 
-            // Ressource ermitteln
-            resource = document.getElementById('resource').textContent;
+    const saveButton = document.createElement('button');
+    saveButton.id = 'saveButton';
+    saveButton.textContent = 'Speichern';
+    saveButton.disabled = true;
 
-            // Load Values from local Store, if exist
-            loadFromStore();
+    const cancelButton = document.createElement('button');
+    cancelButton.id = 'cancelButton';
+    cancelButton.textContent = 'Abbrechen';
+    cancelButton.disabled = true;
 
-            // Das <nav>-Element erstellen
-            const nav = document.createElement('nav');
+    const removeButton = document.createElement('button');
+    removeButton.id = 'removeButton';
+    removeButton.textContent = 'Änderungen verwerfen';
+    removeButton.disabled = true;
 
-            // Die Schaltflächen erstellen
-            const editButton = document.createElement('button');
-            editButton.id = 'editButton';
-            editButton.textContent = 'Bearbeiten';
-        
-            const saveButton = document.createElement('button');
-            saveButton.id = 'saveButton';
-            saveButton.textContent = 'Speichern';
-            saveButton.disabled= true;
+    const commitButton = document.createElement('button');
+    commitButton.id = 'commitButton';
+    commitButton.textContent = 'Änderungen übertragen';
+    commitButton.disabled = true;
 
+    nav.appendChild(editButton);
+    nav.appendChild(saveButton);
+    nav.appendChild(cancelButton);
+    nav.appendChild(removeButton);
+    nav.appendChild(commitButton);
 
-            const cancelButton = document.createElement('button');
-            cancelButton.id = 'cancelButton';
-            cancelButton.textContent = 'Abbrechen';
-            cancelButton.disabled= true;
+    const header = document.querySelector('header');
+    header.appendChild(nav);
 
-            const removeButton = document.createElement('button');
-            removeButton.id = 'removeButton';
-            removeButton.textContent = 'Änderungen verwerfen';
-            removeButton.disabled= true;
+    editButton.addEventListener('click', function () {
+        editButton.disabled = true;
+        saveButton.disabled = false;
+        cancelButton.disabled = false;
+        removeButton.disabled = false;
+        editResource();
+    });
 
-            const commitButton = document.createElement('button');
-            commitButton.id = 'commitButton';
-            commitButton.textContent = 'Änderungen übertragen';
-            commitButton.disabled= true;
+    saveButton.addEventListener('click', function () {
+        // Selects in neuen Zeilen durch statischen Text ersetzen
+document.querySelectorAll("td select").forEach(select => {
+    const cell = select.parentElement;
+    cell.textContent = select.value;
+  });
+  
+  // Neu hinzugefügte Zeilen im gleichen Stil wie bestehende darstellen
+  document.querySelectorAll("tr.custom").forEach(row => {
+    row.classList.remove("custom");
+  });
+  
+        editButton.disabled = false;
+        saveButton.disabled = true;
+        cancelButton.disabled = true;
+        removeButton.disabled = true;
+        saveResource();
+    });
 
+    cancelButton.addEventListener('click', function () {
+        editButton.disabled = false;
+        saveButton.disabled = true;
+        cancelButton.disabled = true;
+        removeButton.disabled = true;
+        cancelResource();
+    });
 
-            // Die Schaltflächen dem <nav>-Element hinzufügen
-            nav.appendChild(editButton);
-            nav.appendChild(saveButton);
-            nav.appendChild(cancelButton);
-            nav.appendChild(removeButton);
-            nav.appendChild(commitButton);
-
-
-            // Das <nav>-Element dem <header> hinzufügen
-            const header = document.querySelector('header');
-            header.appendChild(nav);
-
-            // Event-Listener für die Schaltflächen hinzufügen
-            editButton.addEventListener('click', function() {
-                console.log('Bearbeiten gestartet');
-                editButton.disabled = true;
-                saveButton.disabled = false;
-                cancelButton.disabled = false;
-                removeButton.disabled = false;
-                editResource();
-
-            });
-
-            saveButton.addEventListener('click', function() {
-                console.log('Änderungen gespeichert');
-                editButton.disabled = false;
-                saveButton.disabled = true;
-                cancelButton.disabled = true;
-                removeButton.disabled = true;
-                saveResource();
-            });
-
-            cancelButton.addEventListener('click', function() {
-                console.log('Änderungen abgebrochen');
-                editButton.disabled = false;
-                saveButton.disabled = true;
-                cancelButton.disabled = true;
-                removeButton.disabled = true;
-                cancelResource();
-            });
-
-            removeButton.addEventListener('click', function() {
-                console.log('Änderungen verwerfen');
-                editButton.disabled = false;
-                saveButton.disabled = true;
-                cancelButton.disabled = true;
-                removeButton.disabled = true;
-                removeStorage();
-            });
-        });
+    removeButton.addEventListener('click', function () {
+        editButton.disabled = false;
+        saveButton.disabled = true;
+        cancelButton.disabled = true;
+        removeButton.disabled = true;
+        removeStorage();
+    });
+});
 
 function replaceQuotes(text) {
-    // Ersetzt alle doppelten Anführungszeichen im Text durch &quot;
     return text.replace(/"/g, '&quot;');
 }
