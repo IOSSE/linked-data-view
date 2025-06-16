@@ -76,6 +76,13 @@ function cancelResource() {
     removePlusButtonRow();
 }
 
+function shortenUri(uri) {
+    if (uri.startsWith("http://meta-pfarrerbuch.evangelische-archive.de/vocabulary#")) {
+        return "mpbv:" + uri.split("#")[1];
+    }
+    return uri;
+}
+
 function insertPlusButtonRow() {
     if (document.getElementById('plus-row')) return;
 
@@ -93,44 +100,60 @@ function insertPlusButtonRow() {
     plusButton.addEventListener("click", () => {
         const newRow = document.createElement("tr");
         newRow.classList.add("property", "custom");
-      
+
         const propertyCell = document.createElement("td");
         const select = document.createElement("select");
-      
-        config.properties.forEach((prop) => {
-          const option = document.createElement("option");
-          option.value = prop;
-          option.textContent = prop;
-          select.appendChild(option);
+
+        // rdf:type herausfinden
+        const typeElement = document.querySelector('td.resource a[uri="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"]');
+        let type = null;
+        if (typeElement) {
+            const fullTypeUri = typeElement.parentElement.nextElementSibling.textContent.trim();
+            type = shortenUri(fullTypeUri);
+        }
+
+        // passende Properties laden
+        let props = config.properties; // fallback default
+        if (type && config.typeProperties[type]) {
+            props = config.typeProperties[type];
+        }
+
+        // Select befüllen
+        props.forEach((prop) => {
+            const option = document.createElement("option");
+            option.value = prop;
+            option.textContent = prop;
+            select.appendChild(option);
         });
-      
+
         propertyCell.appendChild(select);
-      
+
         const valueCell = document.createElement("td");
         valueCell.className = "literal";
         const input = document.createElement("input");
         input.type = "text";
         valueCell.appendChild(input);
-      
+
         const minusCell = document.createElement("td");
         const minusButton = document.createElement("button");
         minusButton.textContent = "−";
         minusButton.className = "minus-button";
         minusButton.addEventListener("click", () => newRow.remove());
         minusCell.appendChild(minusButton);
-      
+
         newRow.appendChild(propertyCell);
         newRow.appendChild(valueCell);
         newRow.appendChild(minusCell);
-      
+
         table.appendChild(newRow);
-      });
-      
+    });
 
     td.appendChild(plusButton);
     row.appendChild(td);
     table.appendChild(row);
 }
+
+
 
 function removePlusButtonRow() {
     const plusRow = document.getElementById('plus-row');
