@@ -63,6 +63,9 @@ function saveResource() {
         element.innerHTML = value;
     });
 
+    // MINUS-BUTTONS ENTFERNEN
+    document.querySelectorAll(".minus-button").forEach(btn => btn.remove());
+
     checkLabel();
     removePlusButtonRow();
 }

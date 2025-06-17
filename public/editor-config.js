@@ -4,8 +4,6 @@ const config = {
     "rdfs:label"
   ],
   properties: [
-    "rdf:type",
-    "rdfs:label",
     "mpbv:hatLebensabschnitt",
     "mpbv:vorname",
     "mpbv:nachname",
@@ -16,9 +14,7 @@ const config = {
 
   typeProperties: {
     "mpbv:Pfarrer-in": 
-    ["rdf:type",
-      "rdfs:label",
-      "mpbv:hatLebensabschnitt",
+    ["mpbv:hatLebensabschnitt",
       "mpbv:vorname",
       "mpbv:nachname",
       "mpbv:datum",	
