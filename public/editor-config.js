@@ -26,11 +26,9 @@ const config = {
 
         "mpbv:Tod": 
       ["mpbv:hatLebensabschnitt",
-        "mpbv:vorname",
-        "mpbv:nachname",
         "mpbv:datum",	
-        "mpbv:jahr",
-        "mpbv:Geburt"],
+        "mpbv:jahr"
+      ],
 
     "mpbv:Ordination": ["mpbv:datum", "mpbv:jahr", "mpbv:hatOrt"],
     "mpbv:Ausbildung": ["mpbv:hatLebensabschnitt"],

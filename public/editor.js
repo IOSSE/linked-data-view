@@ -1,43 +1,41 @@
-// containts the resource uri
+// Stores the current resource URI
 var resource = '';
 
 function editResource() {
     const literalCells = document.querySelectorAll("td.literal");
+
     literalCells.forEach((element) => {
         const value = replaceQuotes(element.textContent);
         const predicate = element.previousElementSibling;
         element.setAttribute('save', value);
 
+        // Only allow editing if predicate is not protected
         if (!config.protectedPredicates.includes(predicate.textContent)) {
             element.innerHTML = `<input type="text" value="${value}"/>`;
         }
 
-        // Nur im Bearbeitungsmodus Minus-Button einfügen (falls nicht vorhanden)
-        const predicateText = element.previousElementSibling.textContent;
+        const predicateText = predicate.textContent;
 
-// Nur wenn Prädikat nicht geschützt und noch keine minus-cell da ist
-if (
-    !config.protectedPredicates.includes(predicateText) &&
-    !element.parentElement.querySelector('.minus-cell')
-  ) {
-    const minusButton = document.createElement('button');
-    minusButton.textContent = '−';
-    minusButton.classList.add('minus-button');
-    minusButton.addEventListener('click', () => {
-      localStorage.setItem(resource + '$delete$' + predicateText, '');
-      element.parentElement.remove();
-    });
-  
-    const minusCell = document.createElement('td');
-    minusCell.classList.add('minus-cell'); // ← eindeutig!
-    minusCell.appendChild(minusButton);
-  
-    const row = element.parentElement;
-    row.appendChild(minusCell); // oder:
-    // row.insertBefore(minusCell, row.children[2]);
-  }
-  
+        // Insert minus button only if not already present and predicate is not protected
+        if (
+            !config.protectedPredicates.includes(predicateText) &&
+            !element.parentElement.querySelector('.minus-cell')
+        ) {
+            const minusButton = document.createElement('button');
+            minusButton.textContent = '−';
+            minusButton.classList.add('minus-button');
+            minusButton.addEventListener('click', () => {
+                localStorage.setItem(resource + '$delete$' + predicateText, '');
+                element.parentElement.remove();
+            });
 
+            const minusCell = document.createElement('td');
+            minusCell.classList.add('minus-cell');
+            minusCell.appendChild(minusButton);
+
+            const row = element.parentElement;
+            row.appendChild(minusCell);
+        }
     });
 
     insertPlusButtonRow();
@@ -45,60 +43,59 @@ if (
 
 function saveResource() {
     const literalCells = document.querySelectorAll("td.literal");
+
     literalCells.forEach((element) => {
         const inputElement = element.querySelector('input');
-        let value;
-        if (inputElement) {
-            value = replaceQuotes(inputElement.value);
-        } else {
-            value = replaceQuotes(element.textContent);
-        }
+        let value = inputElement
+            ? replaceQuotes(inputElement.value)
+            : replaceQuotes(element.textContent);
 
         const predicateCell = element.previousElementSibling;
         const pred = predicateCell.querySelector('select')?.value || predicateCell.textContent;
 
+        // Save only if value has changed
         if (value !== element.getAttribute('save')) {
             element.classList.add('new');
             localStorage.setItem(resource + '$' + pred, value);
         }
 
-        // Bei neuen Zeilen ohne vorherigen "save"-Wert trotzdem speichern
+        // Save new values that were added without a previous "save" attribute
         if (!element.hasAttribute('save')) {
             element.classList.add('new');
             localStorage.setItem(resource + '$' + pred, value);
         }
 
-        // Sonderfall: mpbv:hatLebensabschnitt 
-if (pred === 'mpbv:hatLebensabschnitt') {
-    const a = document.createElement('a');
-    a.className = 'resource intern';
-    a.href = value;
-    a.setAttribute('uri', value.startsWith('http') ? value : 'http://meta-pfarrerbuch.evangelische-archive.de' + value);
-    a.setAttribute('rel', 'nofollow');
-    a.textContent = value.split('/').pop(); // oder z. B. "geboren 1912" – wenn bekannt
-    element.innerHTML = '';
-    element.appendChild(a);
-} else {
-    element.innerHTML = value;
-}
-
+        // Special case: convert to internal resource link if Lebensabschnitt
+        if (pred === 'mpbv:hatLebensabschnitt') {
+            const a = document.createElement('a');
+            a.className = 'resource intern';
+            a.href = value;
+            a.setAttribute('uri', value.startsWith('http') ? value : 'http://meta-pfarrerbuch.evangelische-archive.de' + value);
+            a.setAttribute('rel', 'nofollow');
+            a.textContent = value.split('/').pop();
+            element.innerHTML = '';
+            element.appendChild(a);
+        } else {
+            element.innerHTML = value;
+        }
     });
 
     removePlusButtonRow();
     checkLabel();
-    removePlusButtonRow();
-    // MINUS-BUTTONS & leere Zellen entfernen
+
+    // Remove minus buttons and their cells
     document.querySelectorAll(".minus-button").forEach(btn => btn.remove());
     document.querySelectorAll("td.minus-cell").forEach(cell => cell.remove());
 }
 
 function cancelResource() {
     const literalCells = document.querySelectorAll("td.literal");
+
     literalCells.forEach((element) => {
         element.innerHTML = element.getAttribute('save');
     });
 
-    // MINUS-BUTTONS & leere Zellen entfernen
+    // Remove minus buttons and cells
     document.querySelectorAll(".minus-button").forEach(btn => btn.remove());
     document.querySelectorAll("td.minus-cell").forEach(cell => cell.remove());
 
@@ -126,6 +123,7 @@ function insertPlusButtonRow() {
     const plusButton = document.createElement('button');
     plusButton.textContent = '+';
     plusButton.classList.add('plus-button');
+
     plusButton.addEventListener("click", () => {
         const newRow = document.createElement("tr");
         newRow.classList.add("property", "custom");
@@ -133,7 +131,7 @@ function insertPlusButtonRow() {
         const propertyCell = document.createElement("td");
         const select = document.createElement("select");
 
-        // rdf:type herausfinden
+        // Determine RDF type from table
         const typeElement = document.querySelector('td.resource a[uri="http://www.w3.org/1999/02/22-rdf-syntax-ns#type"]');
         let type = null;
         if (typeElement) {
@@ -141,13 +139,13 @@ function insertPlusButtonRow() {
             type = shortenUri(fullTypeUri);
         }
 
-        // passende Properties laden
-        let props = config.properties; // fallback default
+        // Load property options based on type or fallback
+        let props = config.properties;
         if (type && config.typeProperties[type]) {
             props = config.typeProperties[type];
         }
 
-        // Select befüllen
+        // Populate select dropdown
         props.forEach((prop) => {
             const option = document.createElement("option");
             option.value = prop;
@@ -182,8 +180,6 @@ function insertPlusButtonRow() {
     table.appendChild(row);
 }
 
-
-
 function removePlusButtonRow() {
     const plusRow = document.getElementById('plus-row');
     if (plusRow) {
@@ -197,24 +193,17 @@ function checkLabel() {
     if (rdfTypeElement) {
         const rdfTypeValue = rdfTypeElement.parentElement.nextElementSibling.textContent.trim();
         const labelConstruct = config.defineLabel[rdfTypeValue];
+
         if (labelConstruct) {
-            let value;
             const replacedText = labelConstruct.replace(/{(.*?)}/g, (match, key) => {
-                if (key.startsWith('fkt_')) {
-                    if (typeof globalThis[key] === 'function') {
-                        value = globalThis[key]();
-                    } else {
-                        console.warn(`Keine Funktion namens ${key} definiert.`);
-                    }
+                if (key.startsWith('fkt_') && typeof globalThis[key] === 'function') {
+                    return globalThis[key]();
                 } else {
                     const keyValue = document.querySelector('td.resource a[uri="' + key + '"]');
-                    if (keyValue) {
-                        value = keyValue.parentElement.nextElementSibling.textContent.trim();
-                    } else {
-                        value = '';
-                    }
+                    return keyValue
+                        ? keyValue.parentElement.nextElementSibling.textContent.trim()
+                        : '';
                 }
-                return value !== undefined ? value : match;
             });
 
             const labelElementKey = document.querySelector('td.resource a[uri="http://www.w3.org/2000/01/rdf-schema#label"]');
@@ -234,11 +223,12 @@ function checkLabel() {
 
 function loadFromStore() {
     const literalCells = document.querySelectorAll("td.literal");
+
     literalCells.forEach((element) => {
         const predicate = element.previousElementSibling;
         const pred = predicate.textContent;
 
-        // Überspringe gelöschte Einträge
+        // Skip if marked for deletion
         if (localStorage.getItem(resource + '$delete$' + pred) !== null) {
             element.parentElement.remove();
             return;
@@ -246,15 +236,15 @@ function loadFromStore() {
 
         const value = localStorage.getItem(resource + '$' + pred);
         if (value !== null) {
-            // Property-Zelle 
+            // Create URI link in predicate cell if applicable
             if (pred.includes(':')) {
                 const [prefix, local] = pred.split(':');
                 let base = '';
                 if (prefix === 'mpbv') {
                     base = "http://meta-pfarrerbuch.evangelische-archive.de/vocabulary#";
                 }
-                const uri = base + local;
 
+                const uri = base + local;
                 const propertyLink = document.createElement('a');
                 propertyLink.className = "resource extern";
                 propertyLink.href = uri;
@@ -267,7 +257,7 @@ function loadFromStore() {
                 predicate.appendChild(propertyLink);
             }
 
-            // Wert-Zelle 
+            // Handle value cell
             if (pred === 'mpbv:hatLebensabschnitt') {
                 const a = document.createElement('a');
                 a.className = 'resource intern';
@@ -285,6 +275,7 @@ function loadFromStore() {
 
             element.classList.add('new');
 
+            // Update page title if label
             if (pred === 'rdfs:label') {
                 document.title = value;
                 const firstH1 = document.querySelector('h1');
@@ -293,10 +284,10 @@ function loadFromStore() {
         }
     });
 
-    // Labels von verlinkten Ressourcen aktualisieren
+    // Update labels of internal resource links
     const resourceCells = document.querySelectorAll("a.resource.intern");
+
     resourceCells.forEach((element) => {
-        const predicate = element.parentElement.previousElementSibling;
         const value = localStorage.getItem(element.getAttribute('uri') + '$rdfs:label');
         if (value !== null) {
             element.textContent = value;
@@ -304,7 +295,7 @@ function loadFromStore() {
         }
     });
 
-    // Neue Zeilen aus dem localStorage ergänzen
+    // Add new rows from localStorage
     for (let i = 0; i < localStorage.length; i++) {
         const key = localStorage.key(i);
 
@@ -312,11 +303,9 @@ function loadFromStore() {
             const pred = key.split('$')[1];
             const value = localStorage.getItem(key);
 
-            // Falls Prädikat bereits in der Tabelle, überspringen
-            const exists = Array.from(document.querySelectorAll("td.literal")).some(cell => {
-                const existingPred = cell.previousElementSibling.textContent;
-                return existingPred === pred;
-            });
+            const exists = Array.from(document.querySelectorAll("td.literal")).some(cell =>
+                cell.previousElementSibling.textContent === pred
+            );
             if (exists) continue;
 
             const table = document.querySelector('table');
@@ -369,7 +358,6 @@ function loadFromStore() {
     checkLabel();
 }
 
-
 function removeStorage() {
     localStorage.clear();
     window.location.reload(true);
@@ -411,8 +399,7 @@ document.addEventListener('DOMContentLoaded', function () {
     nav.appendChild(removeButton);
     nav.appendChild(commitButton);
 
-    const header = document.querySelector('header');
-    header.appendChild(nav);
+    document.querySelector('header').appendChild(nav);
 
     editButton.addEventListener('click', function () {
         editButton.disabled = true;
@@ -423,21 +410,17 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     saveButton.addEventListener('click', function () {
-        // Selects in neuen Zeilen durch statischen Text ersetzen
+        // Convert dropdowns into static links or text
         document.querySelectorAll("td select").forEach(select => {
             const cell = select.parentElement;
             const value = select.value;
-        
-            // Prüfe ob das ein Prefix wie "mpbv:" ist und bilde daraus den URI-Link
+
             if (value.includes(':')) {
                 const [prefix, local] = value.split(':');
-                let base;
-                if (prefix === 'mpbv') {
-                    base = "http://meta-pfarrerbuch.evangelische-archive.de/vocabulary#";
-                } else {
-                    base = ''; // Optional: andere Prefixes behandeln
-                }
-        
+                let base = prefix === 'mpbv'
+                    ? "http://meta-pfarrerbuch.evangelische-archive.de/vocabulary#"
+                    : '';
+
                 const uri = base + local;
                 const a = document.createElement('a');
                 a.className = "resource extern";
@@ -446,25 +429,24 @@ document.addEventListener('DOMContentLoaded', function () {
                 a.setAttribute("rel", "nofollow");
                 a.setAttribute("target", "_blank");
                 a.textContent = value;
-        
+
                 cell.innerHTML = '';
                 cell.appendChild(a);
             } else {
-                // fallback: als plain text anzeigen
                 cell.textContent = value;
             }
         });
-        
-  
-  // Neu hinzugefügte Zeilen im gleichen Stil wie bestehende darstellen
-  document.querySelectorAll("tr.custom").forEach(row => {
-    row.classList.remove("custom");
-  });
-  
+
+        // Remove "custom" class from newly added rows
+        document.querySelectorAll("tr.custom").forEach(row => {
+            row.classList.remove("custom");
+        });
+
         editButton.disabled = false;
         saveButton.disabled = true;
         cancelButton.disabled = true;
         removeButton.disabled = true;
+
         saveResource();
     });
 
@@ -473,6 +455,7 @@ document.addEventListener('DOMContentLoaded', function () {
         saveButton.disabled = true;
         cancelButton.disabled = true;
         removeButton.disabled = true;
+
         cancelResource();
     });
 
@@ -481,6 +464,7 @@ document.addEventListener('DOMContentLoaded', function () {
         saveButton.disabled = true;
         cancelButton.disabled = true;
         removeButton.disabled = true;
+
         removeStorage();
     });
 });
