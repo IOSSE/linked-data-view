@@ -68,7 +68,20 @@ function saveResource() {
             localStorage.setItem(resource + '$' + pred, value);
         }
 
-        element.innerHTML = value;
+        // Sonderfall: mpbv:hatLebensabschnitt 
+if (pred === 'mpbv:hatLebensabschnitt') {
+    const a = document.createElement('a');
+    a.className = 'resource intern';
+    a.href = value;
+    a.setAttribute('uri', value.startsWith('http') ? value : 'http://meta-pfarrerbuch.evangelische-archive.de' + value);
+    a.setAttribute('rel', 'nofollow');
+    a.textContent = value.split('/').pop(); // oder z. B. "geboren 1912" – wenn bekannt
+    element.innerHTML = '';
+    element.appendChild(a);
+} else {
+    element.innerHTML = value;
+}
+
     });
 
     removePlusButtonRow();
@@ -233,8 +246,45 @@ function loadFromStore() {
 
         const value = localStorage.getItem(resource + '$' + pred);
         if (value !== null) {
-            element.textContent = value;
+            // Property-Zelle 
+            if (pred.includes(':')) {
+                const [prefix, local] = pred.split(':');
+                let base = '';
+                if (prefix === 'mpbv') {
+                    base = "http://meta-pfarrerbuch.evangelische-archive.de/vocabulary#";
+                }
+                const uri = base + local;
+
+                const propertyLink = document.createElement('a');
+                propertyLink.className = "resource extern";
+                propertyLink.href = uri;
+                propertyLink.setAttribute("uri", uri);
+                propertyLink.setAttribute("rel", "nofollow");
+                propertyLink.setAttribute("target", "_blank");
+                propertyLink.textContent = pred;
+
+                predicate.innerHTML = '';
+                predicate.appendChild(propertyLink);
+            }
+
+            // Wert-Zelle 
+            if (pred === 'mpbv:hatLebensabschnitt') {
+                const a = document.createElement('a');
+                a.className = 'resource intern';
+                const uri = value.startsWith('http') ? value : 'http://meta-pfarrerbuch.evangelische-archive.de' + value;
+                a.href = uri;
+                a.setAttribute('uri', uri);
+                a.setAttribute('rel', 'nofollow');
+                a.textContent = value.split('/').pop() || value;
+
+                element.innerHTML = '';
+                element.appendChild(a);
+            } else {
+                element.textContent = value;
+            }
+
             element.classList.add('new');
+
             if (pred === 'rdfs:label') {
                 document.title = value;
                 const firstH1 = document.querySelector('h1');
@@ -243,6 +293,7 @@ function loadFromStore() {
         }
     });
 
+    // Labels von verlinkten Ressourcen aktualisieren
     const resourceCells = document.querySelectorAll("a.resource.intern");
     resourceCells.forEach((element) => {
         const predicate = element.parentElement.previousElementSibling;
@@ -252,44 +303,72 @@ function loadFromStore() {
             element.parentElement.classList.add('new');
         }
     });
+
     // Neue Zeilen aus dem localStorage ergänzen
-for (let i = 0; i < localStorage.length; i++) {
-    const key = localStorage.key(i);
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
 
-    if (key.startsWith(resource + '$') && !key.includes('$delete$')) {
-        const pred = key.split('$')[1];
-        const value = localStorage.getItem(key);
+        if (key.startsWith(resource + '$') && !key.includes('$delete$')) {
+            const pred = key.split('$')[1];
+            const value = localStorage.getItem(key);
 
-        // Falls Prädikat bereits in der Tabelle, überspringen
-        const existing = Array.from(document.querySelectorAll("td.literal")).some(cell => {
-            const existingPred = cell.previousElementSibling.textContent;
-            return existingPred === pred;
-        });
-        if (existing) continue;
+            // Falls Prädikat bereits in der Tabelle, überspringen
+            const exists = Array.from(document.querySelectorAll("td.literal")).some(cell => {
+                const existingPred = cell.previousElementSibling.textContent;
+                return existingPred === pred;
+            });
+            if (exists) continue;
 
-        const table = document.querySelector('table');
-        const newRow = document.createElement("tr");
-        newRow.classList.add("property");
+            const table = document.querySelector('table');
+            const newRow = document.createElement("tr");
+            newRow.classList.add("property");
 
-        const propertyCell = document.createElement("td");
-        propertyCell.textContent = pred;
+            const propertyCell = document.createElement("td");
+            if (pred.includes(':')) {
+                const [prefix, local] = pred.split(':');
+                let base = '';
+                if (prefix === 'mpbv') {
+                    base = "http://meta-pfarrerbuch.evangelische-archive.de/vocabulary#";
+                }
+                const uri = base + local;
 
-        const valueCell = document.createElement("td");
-        valueCell.className = "literal new";
-        valueCell.textContent = value;
+                const a = document.createElement("a");
+                a.className = "resource extern";
+                a.href = uri;
+                a.setAttribute("uri", uri);
+                a.setAttribute("rel", "nofollow");
+                a.setAttribute("target", "_blank");
+                a.textContent = pred;
+                propertyCell.appendChild(a);
+            } else {
+                propertyCell.textContent = pred;
+            }
 
+            const valueCell = document.createElement("td");
+            valueCell.className = "literal new";
 
-        newRow.appendChild(propertyCell);
-        newRow.appendChild(valueCell);
-        
+            if (pred === 'mpbv:hatLebensabschnitt') {
+                const a = document.createElement('a');
+                a.className = 'resource intern';
+                const uri = value.startsWith('http') ? value : 'http://meta-pfarrerbuch.evangelische-archive.de' + value;
+                a.href = uri;
+                a.setAttribute('uri', uri);
+                a.setAttribute('rel', 'nofollow');
+                a.textContent = value.split('/').pop() || value;
+                valueCell.appendChild(a);
+            } else {
+                valueCell.textContent = value;
+            }
 
-        table.appendChild(newRow);
+            newRow.appendChild(propertyCell);
+            newRow.appendChild(valueCell);
+            table.appendChild(newRow);
+        }
     }
-}
-
 
     checkLabel();
 }
+
 
 function removeStorage() {
     localStorage.clear();
