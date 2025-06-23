@@ -15,20 +15,28 @@ function editResource() {
         // Nur im Bearbeitungsmodus Minus-Button einfügen (falls nicht vorhanden)
         const predicateText = element.previousElementSibling.textContent;
 
-    // Nur wenn das Prädikat **nicht** geschützt ist
-    if (!config.protectedPredicates.includes(predicateText) && !element.parentElement.querySelector('.minus-button')) {
+// Nur wenn Prädikat nicht geschützt und noch keine minus-cell da ist
+if (
+    !config.protectedPredicates.includes(predicateText) &&
+    !element.parentElement.querySelector('.minus-cell')
+  ) {
     const minusButton = document.createElement('button');
     minusButton.textContent = '−';
     minusButton.classList.add('minus-button');
     minusButton.addEventListener('click', () => {
-        localStorage.setItem(resource + '$delete$' + predicateText, '');
-        element.parentElement.remove();
+      localStorage.setItem(resource + '$delete$' + predicateText, '');
+      element.parentElement.remove();
     });
-
+  
     const minusCell = document.createElement('td');
+    minusCell.classList.add('minus-cell'); // ← eindeutig!
     minusCell.appendChild(minusButton);
-    element.parentElement.appendChild(minusCell);
-    }
+  
+    const row = element.parentElement;
+    row.appendChild(minusCell); // oder:
+    // row.insertBefore(minusCell, row.children[2]);
+  }
+  
 
     });
 
@@ -63,11 +71,12 @@ function saveResource() {
         element.innerHTML = value;
     });
 
-    // MINUS-BUTTONS ENTFERNEN
-    document.querySelectorAll(".minus-button").forEach(btn => btn.remove());
-
+    removePlusButtonRow();
     checkLabel();
     removePlusButtonRow();
+    // MINUS-BUTTONS & leere Zellen entfernen
+    document.querySelectorAll(".minus-button").forEach(btn => btn.remove());
+    document.querySelectorAll("td.minus-cell").forEach(cell => cell.remove());
 }
 
 function cancelResource() {
@@ -75,6 +84,10 @@ function cancelResource() {
     literalCells.forEach((element) => {
         element.innerHTML = element.getAttribute('save');
     });
+
+    // MINUS-BUTTONS & leere Zellen entfernen
+    document.querySelectorAll(".minus-button").forEach(btn => btn.remove());
+    document.querySelectorAll("td.minus-cell").forEach(cell => cell.remove());
 
     removePlusButtonRow();
 }
@@ -265,11 +278,10 @@ for (let i = 0; i < localStorage.length; i++) {
         valueCell.className = "literal new";
         valueCell.textContent = value;
 
-        const dummyCell = document.createElement("td"); // drittes leeres Feld
 
         newRow.appendChild(propertyCell);
         newRow.appendChild(valueCell);
-        newRow.appendChild(dummyCell);
+        
 
         table.appendChild(newRow);
     }
@@ -333,10 +345,37 @@ document.addEventListener('DOMContentLoaded', function () {
 
     saveButton.addEventListener('click', function () {
         // Selects in neuen Zeilen durch statischen Text ersetzen
-document.querySelectorAll("td select").forEach(select => {
-    const cell = select.parentElement;
-    cell.textContent = select.value;
-  });
+        document.querySelectorAll("td select").forEach(select => {
+            const cell = select.parentElement;
+            const value = select.value;
+        
+            // Prüfe ob das ein Prefix wie "mpbv:" ist und bilde daraus den URI-Link
+            if (value.includes(':')) {
+                const [prefix, local] = value.split(':');
+                let base;
+                if (prefix === 'mpbv') {
+                    base = "http://meta-pfarrerbuch.evangelische-archive.de/vocabulary#";
+                } else {
+                    base = ''; // Optional: andere Prefixes behandeln
+                }
+        
+                const uri = base + local;
+                const a = document.createElement('a');
+                a.className = "resource extern";
+                a.href = uri;
+                a.setAttribute("uri", uri);
+                a.setAttribute("rel", "nofollow");
+                a.setAttribute("target", "_blank");
+                a.textContent = value;
+        
+                cell.innerHTML = '';
+                cell.appendChild(a);
+            } else {
+                // fallback: als plain text anzeigen
+                cell.textContent = value;
+            }
+        });
+        
   
   // Neu hinzugefügte Zeilen im gleichen Stil wie bestehende darstellen
   document.querySelectorAll("tr.custom").forEach(row => {

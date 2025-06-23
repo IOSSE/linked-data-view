@@ -16,10 +16,21 @@ const config = {
     "mpbv:Pfarrer-in": 
     ["mpbv:hatLebensabschnitt",
       "mpbv:vorname",
-      "mpbv:nachname",
-      "mpbv:datum",	
-      "mpbv:jahr",
-      "mpbv:Geburt"],
+      "mpbv:nachname"],
+
+      "mpbv:Geburt": 
+      ["mpbv:hatLebensabschnitt",
+        "mpbv:datum",	
+        "mpbv:jahr",
+        ],
+
+        "mpbv:Tod": 
+      ["mpbv:hatLebensabschnitt",
+        "mpbv:vorname",
+        "mpbv:nachname",
+        "mpbv:datum",	
+        "mpbv:jahr",
+        "mpbv:Geburt"],
 
     "mpbv:Ordination": ["mpbv:datum", "mpbv:jahr", "mpbv:hatOrt"],
     "mpbv:Ausbildung": ["mpbv:hatLebensabschnitt"],
