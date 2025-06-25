@@ -99,8 +99,13 @@ function cancelResource() {
     document.querySelectorAll(".minus-button").forEach(btn => btn.remove());
     document.querySelectorAll("td.minus-cell").forEach(cell => cell.remove());
 
+    // Remove the plus button row
     removePlusButtonRow();
+
+    // Remove all newly added rows (not yet saved)
+    document.querySelectorAll("tr.custom").forEach(row => row.remove());
 }
+
 
 function shortenUri(uri) {
     if (uri.startsWith("http://meta-pfarrerbuch.evangelische-archive.de/vocabulary#")) {
