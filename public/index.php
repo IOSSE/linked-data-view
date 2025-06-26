@@ -13,9 +13,9 @@ $uri=$_SERVER['REQUEST_URI'];
 if (strpos($uri, $base) !== 0) $uri = $base . $uri;
 else $base='';
 
-$endpoints = ['https://meta-pfarrerbuch.evangelische-archive.de/meta-daten/brandenburg/sparql',
-	       'https://meta-pfarrerbuch.evangelische-archive.de/meta-daten/kps/sparql',
-	       'https://meta-pfarrerbuch.evangelische-archive.de/meta-daten/sachsen/sparql',
+$endpoints = ['http://fuseki:3030/brandenburg/sparql',
+	       'https://fuseki:3030/kps/sparql',
+	       'https://fuseki:3030/sachsen/sparql',
 	     ];
 $resources = [$uri_base.'/data/brandenburg/',
 	      $uri_base.'/data/kps/',
