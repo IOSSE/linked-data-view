@@ -2,13 +2,9 @@ html {
 
 	font-family: sans-serif; 
 }
-
-tr>td:(1)nd-child {
-	max-width: 40%
-}
-
-tr>td:(2)nd-child {
-	max-width: 60%
+table {
+    table-layout: fixed;
+    width: 100%;
 }
 
 body {
@@ -45,6 +41,29 @@ h2 {
 	padding-top: 0px;
 	margin-top: 0px;
 }
+
+.feedback-button{
+    display:flex;
+    justify-self: right;
+    margin-top:20px;    
+    padding:10px 30px;
+    border: 1px solid #0056b3;
+    text-decoration: none;
+    font-weight: bold;
+    color: black;
+    border-radius: 3px 15px 3px 15px;
+    max-width: 150px;
+}
+.feedback-button:hover{
+	background-color: #0056b3
+}
+
+#feedback-toggle:checked ~ .feedback-form {
+    display: flex;
+    flex-direction: column;
+    max-width: 50%;
+}
+
 .property>td:first-child::before {
     content: '→';
     margin-right: 5px; /* Optional: Abstand zwischen dem Pfeil und dem Inhalt */
@@ -61,6 +80,7 @@ h2 {
 }
 
 .property>td:first-child {
+	width: 220px !important;
 
     background-color: white; 
     color: blue; 
@@ -70,15 +90,21 @@ h2 {
 
 .property>td>a{
     text-decoration: none;
+    max-width: inherit;
+        overflow: hidden;
+        text-overflow: ellipsis;  
 }
 
 
 .property>td:nth-child(2) {
 
+    display: flex;
+    justify-content: space-between;
     background-color: white; 
     color: black; 
     text-align: left;
     border: 2px solid #ddd;
-    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;  
 }
 

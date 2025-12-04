@@ -11,17 +11,35 @@
   		<a href="https://meta-pfarrerbuch.evangelische-archive.de" target="_blank">Projektseite</a>
   	</div>
   	<div>
-	<h1 id="s_l" uri="[subject]">[title]</h1>
-	<h2>[subject]</h2>
-	<table>
-		[result]
-	</table>
+		<h1 id="s_l" uri="[subject]">[title]</h1>
+		<h2>[subject]</h2>
+		<table>
+			[result]
+		</table>
+		<label for="feedback-toggle" class="feedback-button">Feedback geben</label>
+		<input type="checkbox" id="feedback-toggle" hidden>	
+
+		<form action="submit.php" method="POST" class="feedback-form" id="feedback-form" hidden>
+			<label for="title">Title:</label>
+			<input type="text" name="title" id="title">
+
+			<label for="name">Name:</label>
+			<input type="text" name="name" id="name">
+			<input type="hidden" name="selectedItems" id="selectedItems">
+
+			<div>
+				<button type="button" id="clear-btn">Alle löschen</button>
+				<button type="submit">Abgeben</button>				
+			</div>
+
+		</form>
+
 	</div>
 	<div class="cite">
-	<h2>Diese Ressource zitieren:</h2>
-	<div>
-	Verband Kirchlicher Archive (2025). <b>[title].</b> Meta-Pfarrerbuch. Verfügbar unter: <a href="[subject]">[subject]</a>. Zugegriffen am [date].  Lizenziert unter Creative Commons Namensnennung - Weitergabe unter gleichen Bedingungen 4.0 International (<a href="https://creativecommons.org/licenses/by-sa/4.0/ " target="_blank">CC BY SA 4.0</a>).
-	</div>
+		<h2>Diese Ressource zitieren:</h2>
+		<div>
+			Verband Kirchlicher Archive (2025). <b>[title].</b> Meta-Pfarrerbuch. Verfügbar unter: <a href="[subject]">[subject]</a>. Zugegriffen am [date].  Lizenziert unter Creative Commons Namensnennung - Weitergabe unter gleichen Bedingungen 4.0 International (<a href="https://creativecommons.org/licenses/by-sa/4.0/ " target="_blank">CC BY SA 4.0</a>).
+		</div>
 	</div> 
 	
   </body>
