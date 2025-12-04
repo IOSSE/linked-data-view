@@ -3,8 +3,6 @@ const currentUri = window.location.href;
 console.log(currentUri);
 
 
-
-
 document.querySelectorAll ('a.resource.intern').forEach(function(element) {
 
 	const Http = new XMLHttpRequest();

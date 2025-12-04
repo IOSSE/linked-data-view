@@ -19,13 +19,14 @@
 		<label for="feedback-toggle" class="feedback-button">Feedback geben</label>
 		<input type="checkbox" id="feedback-toggle" hidden>	
 
-		<form action="submit.php" method="POST" class="feedback-form" id="feedback-form" hidden>
+		<form action="/submit.php" method="POST" class="feedback-form" id="feedback-form" hidden>
 			<label for="title">Title:</label>
-			<input type="text" name="title" id="title">
+			<input type="text" id="title" name="title" required/>
 
 			<label for="name">Name:</label>
-			<input type="text" name="name" id="name">
-			<input type="hidden" name="selectedItems" id="selectedItems">
+			<input type="text" id="name" name="name" required/>
+
+			<input type="hidden" id="selectedItems" name="selectedItems"/> 
 
 			<div>
 				<button type="button" id="clear-btn">Alle löschen</button>
