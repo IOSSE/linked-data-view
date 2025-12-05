@@ -2,7 +2,6 @@ const currentUri = window.location.href;
 
 console.log(currentUri);
 
-
 document.querySelectorAll ('a.resource.intern').forEach(function(element) {
 
 	const Http = new XMLHttpRequest();
@@ -87,5 +86,14 @@ document.getElementById('feedback-form').addEventListener('submit', function () 
     // Put JSON into hidden input
     document.getElementById('selectedItems').value = JSON.stringify(result);
     console.log(JSON.stringify(result));
-    
+});
+
+document.getElementById('clear-btn').addEventListener('click', function () {
+    document.getElementById('title').value = '';
+    document.getElementById('name').value = '';
+
+    const checkboxes = document.querySelectorAll('.item-edit');
+    checkboxes.forEach(cb => cb.checked = false);
+
+    document.getElementById('selectedItems').value = '';
 });

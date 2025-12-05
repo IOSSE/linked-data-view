@@ -4,7 +4,6 @@ header("Cache-Control: max-age=3600, public");
 
 /* Configuration */
 
-
 $protocol='http://'; // used for subject uri
 $uri_base='/meta-pfarrerbuch.evangelische-archive.de';
 $base='/data'; // used for base folder e.g. when used behind proxy e.g. /data/
@@ -22,7 +21,10 @@ $resources = [$uri_base.'/data/brandenburg/',
 	      $uri_base.'/data/sachsen/',
 	     ];
 
-
+if (strpos($uri, 'submit.php') !== false) {
+    include __DIR__ . '/submit.php';
+    exit;
+}
 
 /* Content negotiation */
 
@@ -121,9 +123,6 @@ function query($uri,$type) {
 	$template = str_replace('[button]', $button, $template);
 
 	echo $template;
-
-
-
 }
 
 function key_value_pairs($sparql,$endpoint,$inverse=false) {
@@ -186,5 +185,4 @@ function key_value_pairs($sparql,$endpoint,$inverse=false) {
 	}
 	
 	return $table;
-
 }

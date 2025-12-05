@@ -1,22 +1,59 @@
 <?php
+require "env.php";
+loadEnv(__DIR__ . "/.env");
 
-$title = $_POST['title'] ?? '';
+// Read form input
+$email = $_POST['email'] ?? '';
 $name  = $_POST['name'] ?? '';
+$desc  = $_POST['desc'] ?? '';
 
-// Read selected checkboxes JSON
 $selectedItemsJson = $_POST['selectedItems'] ?? '[]';
 $selectedItems = json_decode($selectedItemsJson, true);
 
-// Build data array to send to API
-$data = [
-    'title' => $title,
-    'name'  => $name,
-    'items' => $selectedItems
-];
+// Start issue body
+$body  = "E-Mail: $email\n";
+$body .= "Beschreibung:\n$desc\n\n";
+$body .= "zur Überprüfung:\n";
+
+foreach ($selectedItems as $item) {
+    $type  = $item['type'] ?? '';
+    $value = $item['value'] ?? '';
+    $body .= "'$type': $value\n";
+    $body .= "\n";
+}
 
 // Convert to JSON
-$jsonData = json_encode($data, JSON_UNESCAPED_UNICODE);
-
-
-echo "<h2>data:</h2>";
+$jsonData = json_encode([
+    "title" => $name,
+    "body"  => $body,
+]);
 echo "<pre>$jsonData</pre>";
+
+// API endpoint URL
+$token = getenv("API_KEY");
+$ch = curl_init();
+
+curl_setopt($ch, CURLOPT_URL, getenv("API_ENDPOINT"));
+curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+curl_setopt($ch, CURLOPT_HTTPHEADER, [
+    "Content-Type: application/json",
+    "Authorization: token $token",
+    "Content-Length: " . strlen($jsonData)
+]);
+curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+$response = curl_exec($ch);
+$httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+curl_close($ch);
+
+if ($response !== false) {
+    header("Location: /thankyou.html");
+    exit;
+}
+
+// Show API response
+echo "HTTP Status: $httpCode\n\n";
+echo "<h2>API Response:</h2>";
+echo "<pre>$response</pre>";

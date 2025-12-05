@@ -20,11 +20,12 @@
 		<input type="checkbox" id="feedback-toggle" hidden>	
 
 		<form action="/submit.php" method="POST" class="feedback-form" id="feedback-form" hidden>
-			<label for="title">Title:</label>
-			<input type="text" id="title" name="title" required/>
-
 			<label for="name">Name:</label>
 			<input type="text" id="name" name="name" required/>
+			<label for="email">E-Mail:</label>
+			<input type="email" id="email" name="email" required/>
+			<label for="desc">Beschreibung:</label>
+			<textarea id="desc" name="desc" rows="5" placeholder="Hier Beschreibung geben"></textarea>
 
 			<input type="hidden" id="selectedItems" name="selectedItems"/> 
 
@@ -32,7 +33,6 @@
 				<button type="button" id="clear-btn">Alle löschen</button>
 				<button type="submit">Abgeben</button>				
 			</div>
-
 		</form>
 
 	</div>
