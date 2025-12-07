@@ -89,8 +89,9 @@ document.getElementById('feedback-form').addEventListener('submit', function () 
 });
 
 document.getElementById('clear-btn').addEventListener('click', function () {
-    document.getElementById('title').value = '';
+    document.getElementById('email').value = '';
     document.getElementById('name').value = '';
+    document.getElementById('desc').value = '';
 
     const checkboxes = document.querySelectorAll('.item-edit');
     checkboxes.forEach(cb => cb.checked = false);
