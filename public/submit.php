@@ -8,24 +8,26 @@ $name  = $_POST['name'] ?? '';
 $desc  = $_POST['desc'] ?? '';
 $url  = $_POST['url'] ?? '';
 
-$selectedItemsJson = $_POST['selectedItems'] ?? '[]';
-$selectedItems = json_decode($selectedItemsJson, true);
-
-// Start issue body
-$body  = "E-Mail: $email\n";
-$body .= "Beschreibung:\n$desc\n\n";
-$body .= "zur Überprüfung:\n";
-
 if ($email == '' || $name == '') {
     echo '<h2>Error: Empty form</h2>';
     exit;
 }
 
-foreach ($selectedItems as $item) {
-    $type  = $item['type'] ?? '';
-    $value = $item['value'] ?? '';
-    $body .= "'$type': $value\n";
-    $body .= "\n";
+// Start issue body
+$body  = "E-Mail: $email\n";
+$body .= "Beschreibung:\n$desc\n\n";
+
+$selectedItemsJson = $_POST['selectedItems'] ?? '[]';
+if ($selectedItemsJson != '[]') {
+    $selectedItems = json_decode($selectedItemsJson, true);
+
+    $body .= "zur Überprüfung:\n";
+    foreach ($selectedItems as $item) {
+        $type  = $item['type'] ?? '';
+        $value = $item['value'] ?? '';
+        $body .= "'$type': $value\n";
+        $body .= "\n";
+    }   
 }
 
 // Convert to JSON
@@ -33,7 +35,6 @@ $jsonData = json_encode([
     "title" => $name,
     "body"  => $body,
 ]);
-echo "<pre>$jsonData</pre>";
 
 // API endpoint URL
 $token = getenv("API_KEY");
@@ -60,6 +61,7 @@ if ($response !== false) {
 }
 
 // Show API response
+echo "<pre>$jsonData</pre>";
 echo "HTTP Status: $httpCode\n\n";
 echo "<h2>API Response:</h2>";
 echo "<pre>$response</pre>";
