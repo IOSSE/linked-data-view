@@ -4,7 +4,6 @@ header("Cache-Control: max-age=3600, public");
 
 /* Configuration */
 
-
 $protocol='http://'; // used for subject uri
 $uri_base='/meta-pfarrerbuch.evangelische-archive.de';
 $base='/data'; // used for base folder e.g. when used behind proxy e.g. /data/
@@ -22,7 +21,11 @@ $resources = [$uri_base.'/data/brandenburg/',
 	      $uri_base.'/data/sachsen/',
 	     ];
 
-
+if (strpos($uri, 'submit.php') !== false || strpos($uri, 'danke.php') !== false) {
+    include __DIR__ . '/submit.php';
+    include __DIR__ . '/danke.php';
+    exit;
+}
 
 /* Content negotiation */
 
@@ -115,10 +118,12 @@ function query($uri,$type) {
 		key_value_pairs('SELECT DISTINCT ?p ?o  WHERE { ?o ?p <'.$subject.'>}',$endpoint,true),
 		$template);
 	
+	$buttons = '<div class="git-button">'
+		. '<button target="_blank"></button>'
+		. '</div>';
+	$template = str_replace('[button]', $button, $template);
+
 	echo $template;
-
-
-
 }
 
 function key_value_pairs($sparql,$endpoint,$inverse=false) {
@@ -139,22 +144,23 @@ function key_value_pairs($sparql,$endpoint,$inverse=false) {
 
 	curl_close($ch);
 
-
-
-
 	$table = '';
-	
+	$index = 0;
 	foreach ($json_result->results->bindings as $row) {
 		if ($inverse) $table .= '<tr class="property inverse">';
 		else $table .= '<tr class="property">';
 		$table .= '<td><a class="resource extern" href="'.$row->p->value.'" uri="'.$row->p->value.'" rel="nofollow">'.$row->p->value.'</a></td>';
 		
-		if ($row->o->type=="literal") $table .= '<td>'.$row->o->value.'</td>';
+		if ($row->o->type=="literal") $table .= '<td><div>'
+				.$row->o->value.
+				'<input type="checkbox" class="item-edit" id="'.$index.'" hidden data-type="'.$row->p->value.'"  data-value="'.$row->o->value.'"></input>
+			</div></td>';
 		else {
 			$uri=$row->o->value;
 			/* check if resource controlled by the tool */
 			$found = false;
 			foreach ($resources as $resource) {
+
 			    if (strpos($uri, $resource) !== false) {
 				$found = true;
 				break;
@@ -170,11 +176,14 @@ function key_value_pairs($sparql,$endpoint,$inverse=false) {
 			else {
 				$class_resource .= ' extern';
 			}
-			$table .= '<td><a class="'.$class_resource.'" href="'.$uri.'" rel="nofollow">'.$row->o->value.'</a></td>';
+			$table .= '<td><div>
+				<a class="'.$class_resource.'" href="'.$uri.'" rel="nofollow">'.$row->o->value.'</a>
+				<input type="checkbox" class="item-edit" id="'.$index.'" hidden data-type="'.$row->p->value.'" data-value="'.$row->o->value.'"></input>
+			</div></td>';
 		}
 		$table .= '</tr>';
+		$index += 1;
 	}
 	
 	return $table;
-
 }
