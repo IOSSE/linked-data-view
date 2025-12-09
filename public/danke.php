@@ -1,3 +1,6 @@
+<?php
+$url = $_GET['url'] ?? null;
+?>
 <!DOCTYPE html>
 <html lang="de">
   <head>
@@ -9,7 +12,13 @@
   <body>
     <div class="thank">
         <h1>Danke!</h1>
-        <p>Ihre Rueckmeldung wurde erfolgreich gesendet.</p>        
+        <p>Ihre Rückmeldung wurde erfolgreich gesendet.</p>
+
+        <?php if ($url): ?>
+          <div class="backwrapper">
+            <a class="backbtn" href="<?= htmlspecialchars($url) ?>" rel="nofollow">zurück</a>
+          </div>
+        <?php endif; ?>  
     </div>
   </body> 
- </html>
+</html>

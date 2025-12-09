@@ -21,8 +21,9 @@ $resources = [$uri_base.'/data/brandenburg/',
 	      $uri_base.'/data/sachsen/',
 	     ];
 
-if (strpos($uri, 'submit.php') !== false) {
+if (strpos($uri, 'submit.php') !== false || strpos($uri, 'danke.php') !== false) {
     include __DIR__ . '/submit.php';
+    include __DIR__ . '/danke.php';
     exit;
 }
 
@@ -150,10 +151,10 @@ function key_value_pairs($sparql,$endpoint,$inverse=false) {
 		else $table .= '<tr class="property">';
 		$table .= '<td><a class="resource extern" href="'.$row->p->value.'" uri="'.$row->p->value.'" rel="nofollow">'.$row->p->value.'</a></td>';
 		
-		if ($row->o->type=="literal") $table .= '<td>'
+		if ($row->o->type=="literal") $table .= '<td><div>'
 				.$row->o->value.
 				'<input type="checkbox" class="item-edit" id="'.$index.'" hidden data-type="'.$row->p->value.'"  data-value="'.$row->o->value.'"></input>
-			</td>';
+			</div></td>';
 		else {
 			$uri=$row->o->value;
 			/* check if resource controlled by the tool */
@@ -175,10 +176,10 @@ function key_value_pairs($sparql,$endpoint,$inverse=false) {
 			else {
 				$class_resource .= ' extern';
 			}
-			$table .= '<td>
+			$table .= '<td><div>
 				<a class="'.$class_resource.'" href="'.$uri.'" rel="nofollow">'.$row->o->value.'</a>
 				<input type="checkbox" class="item-edit" id="'.$index.'" hidden data-type="'.$row->p->value.'" data-value="'.$row->o->value.'"></input>
-			</td>';
+			</div></td>';
 		}
 		$table .= '</tr>';
 		$index += 1;

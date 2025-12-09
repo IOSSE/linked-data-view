@@ -58,7 +58,12 @@ h2 {
     font-size: 14px;
 }
 
-.feedback-button{
+.backwrapper {
+    padding-right: 100px;
+    width: 100%;
+}
+
+.feedback-button, .backbtn{
     display:flex;
     justify-self: right;
     margin-top:20px;    
@@ -70,7 +75,7 @@ h2 {
     border-radius: 3px 15px 3px 15px;
     max-width: 150px;
 }
-.feedback-button:hover{
+.feedback-button:hover, .backbtn:hover{
 	background-color: #0056b3
 }
 
@@ -127,18 +132,21 @@ h2 {
 }
 
 .property>td:nth-child(2) {
-    display: flex;    
-
-    justify-content: space-between;
     background-color: white; 
-    color: black; 
-    text-align: left;
     border: 2px solid #ddd;
-    overflow: hidden;
-    text-overflow: ellipsis;  
+  
+    div {
+        display: flex;    
+        justify-content: space-between;
+        height:100%;
+        color: black; 
+        text-align: left;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 }
 
-.property>td>a{
+.property>td~a{
     text-decoration: none;
     max-width: inherit;
     overflow: hidden;

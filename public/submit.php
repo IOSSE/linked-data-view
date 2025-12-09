@@ -6,6 +6,7 @@ loadEnv(__DIR__ . "/.env");
 $email = $_POST['email'] ?? '';
 $name  = $_POST['name'] ?? '';
 $desc  = $_POST['desc'] ?? '';
+$url  = $_POST['url'] ?? '';
 
 $selectedItemsJson = $_POST['selectedItems'] ?? '[]';
 $selectedItems = json_decode($selectedItemsJson, true);
@@ -14,6 +15,11 @@ $selectedItems = json_decode($selectedItemsJson, true);
 $body  = "E-Mail: $email\n";
 $body .= "Beschreibung:\n$desc\n\n";
 $body .= "zur Überprüfung:\n";
+
+if ($email == '' || $name == '') {
+    echo '<h2>Error: Empty form</h2>';
+    exit;
+}
 
 foreach ($selectedItems as $item) {
     $type  = $item['type'] ?? '';
@@ -49,7 +55,7 @@ $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 curl_close($ch);
 
 if ($response !== false) {
-    header("Location: /thankyou.html");
+    header("Location: /danke.php?url=" . urlencode($url));
     exit;
 }
 
