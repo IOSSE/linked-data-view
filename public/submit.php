@@ -30,10 +30,14 @@ if ($selectedItemsJson !== '[]') {
     }   
 }
 
+$assignees = getenv("ASSIGNEES");
+$assigneesArray = array_map('trim', explode(',', $assignees));
+
 // Convert to JSON
 $jsonData = json_encode([
     "title" => $name,
     "body"  => $body,
+    "assignees" => $assigneesArray,
 ]);
 
 // API endpoint URL
