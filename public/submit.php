@@ -60,13 +60,13 @@ $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
 curl_close($ch);
 
-if ($response !== false) {
+if ($httpCode == 200) {
     header("Location: danke.php?url=" . urlencode($url));
     exit;
 }
 
 // Show API response
-echo "<p>Endpoint: $endpoint</p>";
+//echo "<p>Endpoint: $endpoint</p>";
 echo "<pre>$jsonData</pre>";
 echo "HTTP Status: $httpCode\n\n";
 
