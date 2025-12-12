@@ -108,10 +108,7 @@ function query($uri,$type) {
 		exit;
 	}
 	
-
 	$template = str_replace('[title]',$label, $template);
-
-
 
 	$template = str_replace('[result]',
 		key_value_pairs('SELECT DISTINCT ?p ?o  WHERE { <'.$subject.'> ?p ?o}',$endpoint).

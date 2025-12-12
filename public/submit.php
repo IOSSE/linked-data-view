@@ -42,9 +42,10 @@ $jsonData = json_encode([
 
 // API endpoint URL
 $token = getenv("API_KEY");
+$endpoint =  getenv("API_ENDPOINT");
 $ch = curl_init();
 
-curl_setopt($ch, CURLOPT_URL, getenv("API_ENDPOINT"));
+curl_setopt($ch, CURLOPT_URL, $endpoint);
 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
 curl_setopt($ch, CURLOPT_HTTPHEADER, [
     "Content-Type: application/json",
@@ -60,12 +61,14 @@ $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 curl_close($ch);
 
 if ($response !== false) {
-    header("Location: /danke.php?url=" . urlencode($url));
+    header("Location: danke.php?url=" . urlencode($url));
     exit;
 }
 
 // Show API response
+echo "<p>Endpoint: $endpoint</p>";
 echo "<pre>$jsonData</pre>";
 echo "HTTP Status: $httpCode\n\n";
+
 echo "<h2>API Response:</h2>";
 echo "<pre>$response</pre>";
