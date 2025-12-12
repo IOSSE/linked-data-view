@@ -18,7 +18,7 @@ $body  = "E-Mail: $email\n";
 $body .= "Beschreibung:\n$desc\n\n";
 
 $selectedItemsJson = $_POST['selectedItems'] ?? '[]';
-if ($selectedItemsJson != '[]') {
+if ($selectedItemsJson !== '[]') {
     $selectedItems = json_decode($selectedItemsJson, true);
 
     $body .= "zur Überprüfung:\n";
