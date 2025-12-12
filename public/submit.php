@@ -60,7 +60,7 @@ $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
 curl_close($ch);
 
-if ($httpCode == 200) {
+if ($httpCode == 201) {
     header("Location: danke.php?url=" . urlencode($url));
     exit;
 }
