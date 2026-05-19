@@ -35,6 +35,7 @@ if ($email == '' || $name == '') {
 }
 $selectedItemsJson = $_POST['selectedItems'] ?? '[]';
 
+// ceck for injection
 if (hasInjectionPattern(strval($email))) $email='Warnung: Mögliches Injection-Muster erkannt!';
 if (hasInjectionPattern(strval($name))) $name='Warnung: Mögliches Injection-Muster erkannt!';
 if (hasInjectionPattern(strval($desc))) $desc='Warnung: Mögliches Injection-Muster erkannt!';
@@ -63,14 +64,9 @@ if ($selectedItemsJson !== '[]') {
 $assignees = getenv("ASSIGNEES");
 $assigneesArray = array_map('trim', explode(',', $assignees));
 
+
 // Extract the name of the dataset from $uri
-$datase='';
-$prefix = $protocol . $uri_base . $base . '/?';
-$pattern = '#^' . preg_quote($prefix, '#') . '([^?]*)#';
-if (preg_match($pattern, $url, $matches)) {
-    $dataset=ucfirst($matches[1]).': ';
-   
-}
+$dataset=$base;
 
 // Convert to JSON
 $jsonData = json_encode([
