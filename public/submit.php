@@ -2,24 +2,51 @@
 require "env.php";
 loadEnv(__DIR__ . "/.env");
 
+// Einfache Funktion, die auf Zeichenfolgen mit typischen Injection-Mustern prüft:
+function hasInjectionPattern($input) {
+    // Typische gefährliche Patterns (Einige Beispiele! Je nach Bedarf erweiterbar)
+    $patterns = [
+        '/<\s*script[^>]*>.*?<\s*\/\s*script\s*>/is', // <script>...</script>
+        '/<\s*iframe[^>]*>.*?<\s*\/\s*iframe\s*>/is', // <iframe>...</iframe>
+        '/([\';]+|(--)+)/',                           // SQL-Injection (' or --)
+        '/<[^>]*>/',                                 // Irgendein HTML-Tag
+        '/(\b(?:eval|base64_decode|system|passthru|shell_exec|exec|popen|proc_open)\b)/i', // typische PHP-Funktionen
+        '/\b(alert|confirm|prompt)\s*\(/i',           // Javascript-Dialoge
+    ];
+    foreach ($patterns as $pattern) {
+        if (preg_match($pattern, $input)) {
+            return true;
+        }
+    }
+    return false;
+}
+
+
 // Read form input
 $email = $_POST['email'] ?? '';
 $name  = $_POST['name'] ?? '';
 $desc  = $_POST['desc'] ?? '';
 $url  = $_POST['url'] ?? '';
-$url  = $_POST['title'] ?? '';
-
+$title  = $_POST['title'] ?? '';
 if ($email == '' || $name == '') {
     echo '<h2>Error: Empty form</h2>';
     exit;
 }
+$selectedItemsJson = $_POST['selectedItems'] ?? '[]';
+
+if (hasInjectionPattern(strval($email))) $email='Warnung: Mögliches Injection-Muster erkannt!';
+if (hasInjectionPattern(strval($name))) $value='Warnung: Mögliches Injection-Muster erkannt!';
+if (hasInjectionPattern(strval($desc))) $value='Warnung: Mögliches Injection-Muster erkannt!';
+if (hasInjectionPattern(strval($url))) $value='Warnung: Mögliches Injection-Muster erkannt!';
+if (hasInjectionPattern(strval($selectedItemsJson))) $value='Warnung: Mögliches Injection-Muster erkannt!';
+
+
 
 // Start issue body
 $body  = "Ressource: $url\n---\n";
 $body  = "Absender: $name <$email>\n";
 $body .= "Beschreibung:\n$desc\n\n";
 
-$selectedItemsJson = $_POST['selectedItems'] ?? '[]';
 if ($selectedItemsJson !== '[]') {
     $selectedItems = json_decode($selectedItemsJson, true);
 
@@ -35,11 +62,18 @@ if ($selectedItemsJson !== '[]') {
 $assignees = getenv("ASSIGNEES");
 $assigneesArray = array_map('trim', explode(',', $assignees));
 
-
+// Extract the name of the dataset from $uri
+$datase='';
+$prefix = $protocol . $uri_base . $base . '/?';
+$pattern = '#^' . preg_quote($prefix, '#') . '([^?]*)#';
+if (preg_match($pattern, $url, $matches)) {
+    $dataset=ucfirst($matches[1]).': ';
+   
+}
 
 // Convert to JSON
 $jsonData = json_encode([
-    "title" => $title,
+    "title" => $dataset.$title,
     "body"  => $body,
     "assignees" => $assigneesArray,
 ]);
