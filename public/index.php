@@ -20,7 +20,10 @@ $resources = [$uri_base.'/data/brandenburg/',
 	      $uri_base.'/data/kps/',
 	      $uri_base.'/data/sachsen/',
 	     ];
-
+$datasets = ['Brandenburg',
+	      'KPS',
+	      'Sachsen',
+	     ];
 if (strpos($uri, 'submit.php') !== false || strpos($uri, 'danke.php') !== false) {
     include __DIR__ . '/submit.php';
     include __DIR__ . '/danke.php';
@@ -81,7 +84,7 @@ function query($uri,$type) {
 	$template = str_replace('[path]',$base.'/', $template);
 	$template = str_replace('[subject]',$subject, $template);
 	$template = str_replace('[date]', date('d.m.Y'), $template);
-	$template = str_replace('[dataset]', $resources[$i], $template);
+	$template = str_replace('[dataset]', $datasets[$i], $template);
 	
 	/* init curl */
 	if (!function_exists('curl_init')) die('CURL is not installed!');

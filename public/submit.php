@@ -44,13 +44,14 @@ if (hasInjectionPattern(strval($email))) $email='Warnung: Mögliches Injection-M
 if (hasInjectionPattern(strval($name))) $name='Warnung: Mögliches Injection-Muster erkannt!';
 if (hasInjectionPattern(strval($desc))) $desc='Warnung: Mögliches Injection-Muster erkannt!';
 if (hasInjectionPattern(strval($url))) $url='Warnung: Mögliches Injection-Muster erkannt!';
+if (hasInjectionPattern(strval($dataset))) $dataset='Warnung: Mögliches Injection-Muster erkannt!';
 if (hasInjectionPattern(strval($selectedItemsJson))) $selectedItemsJson='Warnung: Mögliches Injection-Muster erkannt!';
 
 
 
 // Start issue body
 $body  = "Ressource: $url\n---\n";
-$body  = "Absender: `$name <$email>`\n";
+$body .= "Absender:  $name | $email \n";
 $body .= "Beschreibung:\n$desc\n\n";
 
 if ($selectedItemsJson !== '[]') {
@@ -69,8 +70,6 @@ $assignees = getenv("ASSIGNEES");
 $assigneesArray = array_map('trim', explode(',', $assignees));
 
 
-// Extract the name of the dataset from $uri
-$dataset=$base;
 
 // Convert to JSON
 $jsonData = json_encode([
