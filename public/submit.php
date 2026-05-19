@@ -25,6 +25,7 @@ function hasInjectionPattern($input) {
 // Read form input
 $email = $_POST['email'] ?? '';
 $name  = $_POST['name'] ?? '';
+$name= "`".$name."`":
 $desc  = $_POST['desc'] ?? '';
 $url  = $_POST['url'] ?? '';
 $title  = $_POST['title'] ?? '';
@@ -35,10 +36,10 @@ if ($email == '' || $name == '') {
 $selectedItemsJson = $_POST['selectedItems'] ?? '[]';
 
 if (hasInjectionPattern(strval($email))) $email='Warnung: Mögliches Injection-Muster erkannt!';
-if (hasInjectionPattern(strval($name))) $value='Warnung: Mögliches Injection-Muster erkannt!';
-if (hasInjectionPattern(strval($desc))) $value='Warnung: Mögliches Injection-Muster erkannt!';
-if (hasInjectionPattern(strval($url))) $value='Warnung: Mögliches Injection-Muster erkannt!';
-if (hasInjectionPattern(strval($selectedItemsJson))) $value='Warnung: Mögliches Injection-Muster erkannt!';
+if (hasInjectionPattern(strval($name))) $name='Warnung: Mögliches Injection-Muster erkannt!';
+if (hasInjectionPattern(strval($desc))) $desc='Warnung: Mögliches Injection-Muster erkannt!';
+if (hasInjectionPattern(strval($url))) $url='Warnung: Mögliches Injection-Muster erkannt!';
+if (hasInjectionPattern(strval($selectedItemsJson))) $selectedItemsJson='Warnung: Mögliches Injection-Muster erkannt!';
 
 
 
