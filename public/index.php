@@ -2,50 +2,11 @@
 header("access-control-allow-origin: *");
 header("Cache-Control: max-age=3600, public");
 
-/* Configuration */
-
-$protocol='http://'; // used for subject uri
-$uri_base='/meta-pfarrerbuch.evangelische-archive.de';
-$base='/data'; // used for base folder e.g. when used behind proxy e.g. /data/
-
+include __DIR__ . '/config.php';
+	     
 $uri=$_SERVER['REQUEST_URI'];
 if (strpos($uri, $base) !== 0) $uri = $base . $uri;
 else $base='';
-
-/*
-$endpoints = ['https://meta-pfarrerbuch.evangelische-archive.de/meta-daten/brandenburg/sparql',
-	       'https://meta-pfarrerbuch.evangelische-archive.de/meta-daten/kps/sparql',
-	       'https://meta-pfarrerbuch.evangelische-archive.de/meta-daten/sachsen/sparql',
-	     ];
-$resources = [$uri_base.'/data/brandenburg/',
-	      $uri_base.'/data/kps/',
-	      $uri_base.'/data/sachsen/',
-	     ];
-$datasets = ['Brandenburg',
-	      'KPS',
-	      'Sachsen',
-	     ];
-
-*/
-
-$sources = [
-    [
-        'name' => 'Brandenburg',
-        'endpoint' => 'https://meta-pfarrerbuch.evangelische-archive.de/meta-daten/brandenburg/sparql',
-        'resource' => $uri_base . '/data/brandenburg/',
-    ],
-    [
-        'name' => 'KPS',
-        'endpoint' => 'https://meta-pfarrerbuch.evangelische-archive.de/meta-daten/kps/sparql',
-        'resource' => $uri_base . '/data/kps/',
-    ],
-    [
-        'name' => 'Sachsen',
-        'endpoint' => 'https://meta-pfarrerbuch.evangelische-archive.de/meta-daten/sachsen/sparql',
-        'resource' => $uri_base . '/data/sachsen/',
-    ],
-];	     
-	     
 	     
 if (strpos($uri, 'submit.php') !== false || strpos($uri, 'danke.php') !== false) {
     include __DIR__ . '/submit.php';
