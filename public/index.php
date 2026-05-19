@@ -84,7 +84,7 @@ function query($uri,$type) {
 			echo "No configuration for LOD found.";
 			exit;
 		}
-		$needle = substr($sources[$i]['resources'],strpos($sources[$i]['resources'], '/', 1));
+		$needle = substr($sources[$i]['resource'],strpos($sources[$i]['resourcs'], '/', 1));
 		$contains = str_starts_with($uri, $needle);    
 
 	    	$i++;
