@@ -25,7 +25,7 @@ function hasInjectionPattern($input) {
 // Read form input
 $email = $_POST['email'] ?? '';
 $name  = $_POST['name'] ?? '';
-$name= "`".$name."`":
+$name= "`".$name."`";
 $desc  = $_POST['desc'] ?? '';
 $url  = $_POST['url'] ?? '';
 $title  = $_POST['title'] ?? '';
