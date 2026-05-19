@@ -14,14 +14,15 @@ if ($email == '' || $name == '') {
 }
 
 // Start issue body
-$body  = "E-Mail: $email\n";
+$body  = "Ressource: $url\n---\n";
+$body  = "Absender: $email\n";
 $body .= "Beschreibung:\n$desc\n\n";
 
 $selectedItemsJson = $_POST['selectedItems'] ?? '[]';
 if ($selectedItemsJson !== '[]') {
     $selectedItems = json_decode($selectedItemsJson, true);
 
-    $body .= "zur Überprüfung:\n";
+    $body .= "Zu überprüfende Informationen:\n";
     foreach ($selectedItems as $item) {
         $type  = $item['type'] ?? '';
         $value = $item['value'] ?? '';
