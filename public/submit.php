@@ -7,6 +7,7 @@ $email = $_POST['email'] ?? '';
 $name  = $_POST['name'] ?? '';
 $desc  = $_POST['desc'] ?? '';
 $url  = $_POST['url'] ?? '';
+$url  = $_POST['title'] ?? '';
 
 if ($email == '' || $name == '') {
     echo '<h2>Error: Empty form</h2>';
@@ -15,7 +16,7 @@ if ($email == '' || $name == '') {
 
 // Start issue body
 $body  = "Ressource: $url\n---\n";
-$body  = "Absender: $email\n";
+$body  = "Absender: $name <$email>\n";
 $body .= "Beschreibung:\n$desc\n\n";
 
 $selectedItemsJson = $_POST['selectedItems'] ?? '[]';
@@ -34,9 +35,11 @@ if ($selectedItemsJson !== '[]') {
 $assignees = getenv("ASSIGNEES");
 $assigneesArray = array_map('trim', explode(',', $assignees));
 
+
+
 // Convert to JSON
 $jsonData = json_encode([
-    "title" => $name,
+    "title" => $title,
     "body"  => $body,
     "assignees" => $assigneesArray,
 ]);
