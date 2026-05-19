@@ -22,3 +22,9 @@ function loadEnv($path)
         $_SERVER[$key] = $value;
     }
 }
+
+/* Configuration */
+
+$protocol='http://'; // used for subject uri
+$uri_base='/meta-pfarrerbuch.evangelische-archive.de';
+$base='/data'; // used for base folder e.g. when used behind proxy e.g. /data/
