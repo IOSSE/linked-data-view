@@ -80,7 +80,7 @@ function query($uri,$type) {
 
 	do {
 		/* stop if no configuartion for this type of resource */
-		if ($i==count($resources)) {
+		if ($i==count($sources)) {
 			echo "No configuration for LOD found.";
 			exit;
 		}
