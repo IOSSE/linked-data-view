@@ -27,7 +27,6 @@ function hasInjectionPattern($input) {
 // Read form input
 $email = $_POST['email'] ?? '';
 $name  = $_POST['name'] ?? '';
-$name= "`".$name."`";
 $desc  = $_POST['desc'] ?? '';
 $url  = $_POST['url'] ?? '';
 $title  = $_POST['title'] ?? '';
@@ -51,7 +50,7 @@ if (hasInjectionPattern(strval($selectedItemsJson))) $selectedItemsJson='Warnung
 
 // Start issue body
 $body  = "Ressource: $url\n---\n";
-$body .= "Absender:  $name | $email \n";
+$body .= "Absender: $name | $email\n";
 $body .= "Beschreibung:\n$desc\n\n";
 
 if ($selectedItemsJson !== '[]') {
