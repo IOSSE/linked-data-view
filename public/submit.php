@@ -2,6 +2,8 @@
 require "env.php";
 loadEnv(__DIR__ . "/.env");
 
+
+
 // Einfache Funktion, die auf Zeichenfolgen mit typischen Injection-Mustern prüft:
 function hasInjectionPattern($input) {
     // Typische gefährliche Patterns (Einige Beispiele! Je nach Bedarf erweiterbar)
@@ -29,6 +31,8 @@ $name= "`".$name."`";
 $desc  = $_POST['desc'] ?? '';
 $url  = $_POST['url'] ?? '';
 $title  = $_POST['title'] ?? '';
+$dataset  = $_POST['dataset'] ?? '';
+
 if ($email == '' || $name == '') {
     echo '<h2>Error: Empty form</h2>';
     exit;
@@ -46,7 +50,7 @@ if (hasInjectionPattern(strval($selectedItemsJson))) $selectedItemsJson='Warnung
 
 // Start issue body
 $body  = "Ressource: $url\n---\n";
-$body  = "Absender: $name <$email>\n";
+$body  = "Absender: `$name <$email>`\n";
 $body .= "Beschreibung:\n$desc\n\n";
 
 if ($selectedItemsJson !== '[]') {
@@ -70,7 +74,7 @@ $dataset=$base;
 
 // Convert to JSON
 $jsonData = json_encode([
-    "title" => $dataset.$title,
+    "title" => $dataset.": ".$title,
     "body"  => $body,
     "assignees" => $assigneesArray,
 ]);
@@ -96,6 +100,7 @@ $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 curl_close($ch);
 
 if ($httpCode == 201) {
+    // go back to previous resource
     header("Location: danke.php?url=" . urlencode($url));
     exit;
 }
