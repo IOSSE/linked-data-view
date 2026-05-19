@@ -103,7 +103,7 @@ function query($uri,$type) {
 		key_value_pairs('SELECT DISTINCT ?p ?o  WHERE { ?o ?p <'.$subject.'>}',$endpoint,true),
 		$template);
 	
-	$buttons = '<div class="git-button">'
+	$button = '<div class="git-button">'
 		. '<button target="_blank"></button>'
 		. '</div>';
 	$template = str_replace('[button]', $button, $template);
