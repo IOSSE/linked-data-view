@@ -12,6 +12,7 @@ $uri=$_SERVER['REQUEST_URI'];
 if (strpos($uri, $base) !== 0) $uri = $base . $uri;
 else $base='';
 
+/*
 $endpoints = ['https://meta-pfarrerbuch.evangelische-archive.de/meta-daten/brandenburg/sparql',
 	       'https://meta-pfarrerbuch.evangelische-archive.de/meta-daten/kps/sparql',
 	       'https://meta-pfarrerbuch.evangelische-archive.de/meta-daten/sachsen/sparql',
@@ -24,6 +25,28 @@ $datasets = ['Brandenburg',
 	      'KPS',
 	      'Sachsen',
 	     ];
+
+*/
+
+$sources = [
+    [
+        'name' => 'Brandenburg',
+        'endpoint' => 'https://meta-pfarrerbuch.evangelische-archive.de/meta-daten/brandenburg/sparql',
+        'resource' => $uri_base . '/data/brandenburg/',
+    ],
+    [
+        'name' => 'KPS',
+        'endpoint' => 'https://meta-pfarrerbuch.evangelische-archive.de/meta-daten/kps/sparql',
+        'resource' => $uri_base . '/data/kps/',
+    ],
+    [
+        'name' => 'Sachsen',
+        'endpoint' => 'https://meta-pfarrerbuch.evangelische-archive.de/meta-daten/sachsen/sparql',
+        'resource' => $uri_base . '/data/sachsen/',
+    ],
+];	     
+	     
+	     
 if (strpos($uri, 'submit.php') !== false || strpos($uri, 'danke.php') !== false) {
     include __DIR__ . '/submit.php';
     include __DIR__ . '/danke.php';
@@ -50,7 +73,7 @@ else {
 /* deliver content */
 function query($uri,$type) {
 
-	global $endpoints, $resources, $protocol, $base, $uri_base;
+	global $protocol, $base, $uri_base, $sources;
 
 	/* find sparql endpint for resource */	
 	$i=0;$needle='';
@@ -61,7 +84,7 @@ function query($uri,$type) {
 			echo "No configuration for LOD found.";
 			exit;
 		}
-		$needle = substr($resources[$i],strpos($resources[$i], '/', 1));
+		$needle = substr($sources[$i]['resources'],strpos(($sources[$i]['resources'], '/', 1));
 		$contains = str_starts_with($uri, $needle);    
 
 	    	$i++;
@@ -69,10 +92,10 @@ function query($uri,$type) {
 	$i-=1;
 	
 	/* define SPARQL endpoint from config */
-	$endpoint = $endpoints[$i];
+	$endpoint = $sources[$i]['endpoint'];
 	
 	/* construct subject resource to query */
-	$subject=$protocol. substr($resources[$i],1,strpos($resources[$i], '/', 1)-1) . substr($uri,0,strrpos($uri,'.'));
+	$subject=$protocol . substr($sources[$i]['resource'],1,strpos($sources[$i]['resource'], '/', 1)-1) . substr($uri,0,strrpos($uri,'.'));
 	
 	if (!filter_var($subject, FILTER_VALIDATE_URL)) {
 		echo("$subject is not a valid URI");
@@ -84,7 +107,7 @@ function query($uri,$type) {
 	$template = str_replace('[path]',$base.'/', $template);
 	$template = str_replace('[subject]',$subject, $template);
 	$template = str_replace('[date]', date('d.m.Y'), $template);
-	$template = str_replace('[dataset]', $datasets[$i], $template);
+	$template = str_replace('[dataset]', ($sources[$i]['name'], $template);
 	
 	/* init curl */
 	if (!function_exists('curl_init')) die('CURL is not installed!');
